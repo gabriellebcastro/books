@@ -1,109 +1,141 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./Clubes.css";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
+import axios from 'axios';
 
-// Definindo os tipos para Livro e Modal
-type Livro = {
-  id: number;
-  titulo: string;
-  autor: string;
-  sinopse: string;
-  capaUrl: string;
+// Tipo 'Book' atualizado para corresponder ao modelo do backend
+type Book = {
+  _id: string;
+  title: string;
+  author: string;
+  isbn: string;
+  genre: string;
+  pages: number;
+  cover: string;
 };
 
-// Dados de exemplo (mock)
-const mockLivros: Livro[] = [
-  {
-    id: 1,
-    titulo: "O Senhor dos Anéis",
-    autor: "J.R.R. Tolkien",
-    sinopse: "Uma jornada épica para destruir um anel mágico e salvar a Terra-média da escuridão.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/71ZLavB-8NL.jpg",
-  },
-  {
-    id: 2,
-    titulo: "Duna",
-    autor: "Frank Herbert",
-    sinopse: "A história de Paul Atreides, herdeiro de uma nobre família em um futuro distante, que deve liderar seu povo no perigoso planeta desértico de Arrakis.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/A1u+2fY5yTL.jpg",
-  },
-  {
-    id: 3,
-    titulo: "1984",
-    autor: "George Orwell",
-    sinopse: "Um romance distópico que explora os perigos do totalitarismo, da vigilância em massa e da repressão da liberdade individual.",
-    capaUrl: "https://m.media-amazon.com/images/I/819js3EQwbL._AC_UF1000,1000_QL80_.jpg",
-  },
-  {
-    id: 4,
-    titulo: "A Revolução dos Bichos",
-    autor: "George Orwell",
-    sinopse: "Uma fábula satírica sobre um grupo de animais que se rebelam contra seus donos humanos, apenas para cair sob uma tirania ainda mais brutal.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/912i3kG+tIL.jpg",
-  },
-  {
-    id: 5,
-    titulo: "O Guia do Mochileiro das Galáxias",
-    autor: "Douglas Adams",
-    sinopse: "A cômica aventura de Arthur Dent, um humano que é salvo da destruição da Terra por seu amigo alienígena, Ford Prefect.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/81Jj4s4pGjL.jpg",
-  },
-  {
-    id: 6,
-    titulo: "Cem Anos de Solidão",
-    autor: "Gabriel García Márquez",
-    sinopse: "A história da família Buendía na cidade fictícia de Macondo, ao longo de sete gerações.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/81+U+4o4+jL.jpg",
-  },
-  {
-    id: 7,
-    titulo: "O Apanhador no Campo de Centeio",
-    autor: "J.D. Salinger",
-    sinopse: "A história de Holden Caulfield, um jovem que lida com a alienação e a angústia da adolescência.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/812gCMvJ6qL.jpg",
-  },
-  {
-    id: 8,
-    titulo: "Fahrenheit 451",
-    autor: "Ray Bradbury",
-    sinopse: "Em um futuro onde os livros são proibidos, um bombeiro começa a questionar seu papel na sociedade.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/71OFqSR+s+L.jpg",
-  },
-  {
-    id: 9,
-    titulo: "O Sol é para Todos",
-    autor: "Harper Lee",
-    sinopse: "Uma história sobre injustiça racial em uma pequena cidade do sul dos Estados Unidos, vista pelos olhos de uma criança.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/91MMt6A2u3L.jpg",
-  },
-  {
-    id: 10,
-    titulo: "O Grande Gatsby",
-    autor: "F. Scott Fitzgerald",
-    sinopse: "Um retrato da Era do Jazz na América, explorando temas de riqueza, amor e o sonho americano.",
-    capaUrl: "https://images-na.ssl-images-amazon.com/images/I/81Qu3hQ3d4L.jpg",
-  },
-];
-
 export function ClubesPage() {
-  const [searchParams] = useSearchParams();
-  const tabParam = searchParams.get("tab");
-  const [tab, setTab] = useState(tabParam || "meus-livros");
-  const [showEncontrosDropdown, setShowEncontrosDropdown] = useState(false);
+  const [myBooks, setMyBooks] = useState<Book[]>([]);
+  const [searchResults, setSearchResults] = useState<Book[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   
-  // Estado para os livros e para o modal
-  const [livros] = useState<Livro[]>(mockLivros);
-  const [selectedLivro, setSelectedLivro] = useState<Livro | null>(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
-  const handleOpenModal = (livro: Livro) => {
-    setSelectedLivro(livro);
+  // Busca os livros do usuário ao carregar o componente
+  const fetchMyBooks = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const { data } = await axios.get('http://localhost:5000/api/users/mybooks', config);
+      setMyBooks(data);
+    } catch (err) {
+      setError("Não foi possível carregar seus livros. Tente novamente mais tarde.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    fetchMyBooks();
+  }, [navigate, token, fetchMyBooks]);
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        params: { keyword: searchQuery },
+      };
+      const { data } = await axios.get('http://localhost:5000/api/books/search', config);
+      setSearchResults(data);
+    } catch (err) {
+      setError("Erro ao buscar livros.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddBook = async (bookId: string) => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      await axios.post('http://localhost:5000/api/users/mybooks', { bookId }, config);
+      alert('Livro adicionado à sua estante!');
+      // Atualiza a lista de livros e limpa a busca
+      fetchMyBooks();
+      setSearchResults([]);
+      setSearchQuery("");
+      if (selectedBook) handleCloseModal();
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        alert(`Erro ao adicionar livro: ${err.response.data.message || 'Tente novamente.'}`);
+      } else {
+        alert('Erro ao adicionar livro. Tente novamente.');
+      }
+      console.error(err);
+    }
+  };
+
+  const handleRemoveBook = async (bookId: string) => {
+    if (!window.confirm("Tem certeza que deseja remover este livro da sua estante?")) {
+      return;
+    }
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      await axios.delete(`http://localhost:5000/api/users/mybooks/${bookId}`, config);
+      setMyBooks(myBooks.filter(book => book._id !== bookId));
+      alert('Livro removido da sua estante.');
+      if (selectedBook && selectedBook._id === bookId) {
+        handleCloseModal();
+      }
+    } catch (err) {
+      alert("Erro ao remover livro. Tente novamente.");
+      console.error(err);
+    }
+  };
+
+  const handleOpenModal = (book: Book) => {
+    setSelectedBook(book);
   };
 
   const handleCloseModal = () => {
-    setSelectedLivro(null);
+    setSelectedBook(null);
   };
+
+  const isBookInLibrary = (bookId: string) => {
+    return myBooks.some(book => book._id === bookId);
+  }
 
   return (
     <>
@@ -111,82 +143,98 @@ export function ClubesPage() {
       <div className="clubes-hero">
         <h1>Minha biblioteca</h1>
         <p className="subheading">
-          Visualize sua biblioteca e cadastre novos livros.
+          Pesquise livros no catálogo ou visualize sua biblioteca.
         </p>
-        <div className="tabs">
-          <button
-            className={tab === "meus-livros" ? "active" : ""}
-            onClick={() => setTab("meus-livros")}
-          >
-            Meus livros
-          </button>
-          <button
-            className={tab === "amigos" ? "active" : ""}
-            onClick={() => setTab("amigos")}
-          >
-            Meus amigos
-          </button>
-        </div>
       </div>
 
       <div className="clubes-page">
         <div className="filtros-container">
           <div className="filtros">
             <div className="search-bar">
-              <input type="text" placeholder="Pesquise seus livros" />
-              <button className="search-icon">🔍</button>
-            </div>
-            <div className="filtros-rapidos">
-              <span className="filtros-label">Filtros rápidos:</span>
-              <button> Gênero Literário </button>
-              <button> Autor </button>
-              <div className="dropdown-wrapper">
-                <button
-                  className="dropdown-toggle"
-                  onClick={() => setShowEncontrosDropdown(!showEncontrosDropdown)}
-                >
-                  Status
-                </button>
-                {showEncontrosDropdown && (
-                  <div className="club-dropdown-menu">
-                    <button>Quero ler</button>
-                    <button>Lendo</button>
-                    <button>Lido</button>
-                  </div>
-                )}
-              </div>
-              <button>Favoritos</button>
-              <button>Emprestei</button>
+              <input 
+                type="text" 
+                placeholder="Pesquise por título, autor ou ISBN..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <button className="search-icon" onClick={handleSearch}>🔍</button>
             </div>
           </div>
-          <button className="btn-add-livro" onClick={() => navigate('/cadastrar-livro')}>+ Cadastrar Livro</button>
+          <button className="btn-add-livro" onClick={() => navigate('/cadastrar-livro')}>+ Cadastrar Novo Livro</button>
         </div>
 
+        {error && <p className="error-message">{error}</p>}
+        {loading && <p>Carregando...</p>}
+
+        {/* Resultados da Busca */}
+        {searchResults.length > 0 && (
+          <div className="search-results">
+            <h2>Resultados da Busca</h2>
+            <div className="livros-grid">
+              {searchResults.map((book) => (
+                <div className="livro-card-container" key={book._id}>
+                  <div
+                    className="livro-card"
+                    onClick={() => handleOpenModal(book)}
+                  >
+                    <img src={book.cover} alt={`Capa do livro ${book.title}`} />
+                  </div>
+                  {!isBookInLibrary(book._id) ? (
+                    <button className="btn-add-to-library" onClick={() => handleAddBook(book._id)}>
+                      Adicionar à Estante
+                    </button>
+                  ) : (
+                    <p className="in-library-text">Na sua estante</p>
+                  )}
+                </div>
+              ))}
+            </div>
+            <hr />
+          </div>
+        )}
+
+        {/* Estante do Usuário */}
+        <h2>Minha Estante</h2>
+        {myBooks.length === 0 && !loading && (
+          <p>Sua estante está vazia. Busque um livro e adicione-o!</p>
+        )}
         <div className="livros-grid">
-          {livros.map((livro) => (
+          {myBooks.map((book) => (
             <div
               className="livro-card"
-              key={livro.id}
-              onClick={() => handleOpenModal(livro)}
+              key={book._id}
+              onClick={() => handleOpenModal(book)}
             >
-              <img src={livro.capaUrl} alt={`Capa do livro ${livro.titulo}`} />
+              <img src={book.cover} alt={`Capa do livro ${book.title}`} />
             </div>
           ))}
         </div>
       </div>
 
-      {selectedLivro && (
+      {selectedBook && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close-button" onClick={handleCloseModal}>
               &times;
             </button>
             <div className="modal-body">
-              <img className="modal-capa" src={selectedLivro.capaUrl} alt={`Capa de ${selectedLivro.titulo}`} />
+              <img className="modal-capa" src={selectedBook.cover} alt={`Capa de ${selectedBook.title}`} />
               <div className="modal-details">
-                <h2>{selectedLivro.titulo}</h2>
-                <h3>{selectedLivro.autor}</h3>
-                <p>{selectedLivro.sinopse}</p>
+                <h2>{selectedBook.title}</h2>
+                <h3>por {selectedBook.author}</h3>
+                <p><strong>Gênero:</strong> {selectedBook.genre}</p>
+                <p><strong>Páginas:</strong> {selectedBook.pages}</p>
+                <p><strong>ISBN:</strong> {selectedBook.isbn}</p>
+                {isBookInLibrary(selectedBook._id) ? (
+                   <button className="btn-remove-from-library" onClick={() => handleRemoveBook(selectedBook._id)}>
+                     Remover da Estante
+                   </button>
+                ) : (
+                   <button className="btn-add-to-library-modal" onClick={() => handleAddBook(selectedBook._id)}>
+                     Adicionar à Estante
+                   </button>
+                )}
               </div>
             </div>
           </div>

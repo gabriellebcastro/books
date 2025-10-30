@@ -1,19 +1,17 @@
 import express from 'express';
 const router = express.Router();
 import {
-  getBooks,
-  getBookById,
-  createBook,
-  updateBook,
-  deleteBook,
+  searchBooks,
+  addBookToCatalog,
 } from '../controllers/bookController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
-router.route('/').get(protect, getBooks).post(protect, createBook);
-router
-  .route('/:id')
-  .get(protect, getBookById)
-  .put(protect, updateBook)
-  .delete(protect, deleteBook);
+// @route   /api/books
+
+// Rota para buscar livros no catálogo global
+router.route('/search').get(protect, searchBooks);
+
+// Rota para adicionar um novo livro ao catálogo global
+router.route('/').post(protect, addBookToCatalog);
 
 export default router;

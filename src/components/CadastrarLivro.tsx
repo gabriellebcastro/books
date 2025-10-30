@@ -1,27 +1,62 @@
 import { useState } from 'react';
 import { Navbar } from './Navbar';
 import './CadastrarLivro.css';
+import axios from 'axios'; // Importe o axios
 
-export function CadastrarLivroPage() {
-  const [titulo, setTitulo] = useState('');
-  const [autor, setAutor] = useState('');
+export function CadastrarLivro() { 
+  const [title, setTitle] = useState(''); 
+  const [author, setAuthor] = useState(''); 
   const [isbn, setIsbn] = useState('');
-  const [genero, setGenero] = useState('');
-  const [numPaginas, setNumPaginas] = useState('');
-  const [capaUrl, setCapaUrl] = useState('');
+  const [genre, setGenre] = useState(''); 
+  const [pages, setPages] = useState(''); 
+  const [cover, setCover] = useState(''); 
+  const [message, setMessage] = useState(''); 
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // For now, we'll just log the data to the console
-    console.log({
-      titulo,
-      autor,
-      isbn,
-      genero,
-      numPaginas,
-      capaUrl,
-    });
-    alert('Livro cadastrado com sucesso! (Verifique o console)');
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      setMessage('Você precisa estar logado para cadastrar um livro.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/api/books',
+        {
+          title,
+          author,
+          isbn,
+          genre,
+          pages: Number(pages),
+          cover,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        setMessage('Livro cadastrado com sucesso!');
+        // Limpar o formulário
+        setTitle('');
+        setAuthor('');
+        setIsbn('');
+        setGenre('');
+        setPages('');
+        setCover('');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        setMessage(`Erro: ${error.response.data.message}`);
+      } else {
+        setMessage('Ocorreu um erro ao cadastrar o livro.');
+      }
+      console.error('Erro ao cadastrar livro:', error);
+    }
   };
 
   return (
@@ -31,14 +66,15 @@ export function CadastrarLivroPage() {
         <div className="form-wrapper">
           <h1>Cadastrar Novo Livro</h1>
           <p>Preencha as informações abaixo para adicionar um novo livro à sua biblioteca.</p>
+          {message && <p className="message">{message}</p>}
           <form onSubmit={handleSubmit} className="livro-form">
             <div className="form-group">
               <label htmlFor="titulo">Título</label>
               <input
                 type="text"
                 id="titulo"
-                value={titulo}
-                onChange={(e) => setTitulo(e.target.value)}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
             </div>
@@ -47,8 +83,8 @@ export function CadastrarLivroPage() {
               <input
                 type="text"
                 id="autor"
-                value={autor}
-                onChange={(e) => setAutor(e.target.value)}
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
                 required
               />
             </div>
@@ -66,8 +102,8 @@ export function CadastrarLivroPage() {
               <input
                 type="text"
                 id="genero"
-                value={genero}
-                onChange={(e) => setGenero(e.target.value)}
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
               />
             </div>
             <div className="form-group">
@@ -75,8 +111,8 @@ export function CadastrarLivroPage() {
               <input
                 type="number"
                 id="numPaginas"
-                value={numPaginas}
-                onChange={(e) => setNumPaginas(e.target.value)}
+                value={pages}
+                onChange={(e) => setPages(e.target.value)}
               />
             </div>
             <div className="form-group">
@@ -84,8 +120,8 @@ export function CadastrarLivroPage() {
               <input
                 type="text"
                 id="capaUrl"
-                value={capaUrl}
-                onChange={(e) => setCapaUrl(e.target.value)}
+                value={cover}
+                onChange={(e) => setCover(e.target.value)}
                 required
               />
             </div>

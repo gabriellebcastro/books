@@ -2,11 +2,6 @@ import mongoose from 'mongoose';
 
 const bookSchema = mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: 'User',
-    },
     title: {
       type: String,
       required: true,
@@ -17,7 +12,8 @@ const bookSchema = mongoose.Schema(
     },
     isbn: {
       type: String,
-      required: false,
+      required: true,
+      unique: true,
     },
     genre: {
       type: String,
@@ -27,7 +23,7 @@ const bookSchema = mongoose.Schema(
       type: Number,
       required: true,
     },
-    coverUrl: {
+    cover: {
       type: String,
       required: true,
     },
