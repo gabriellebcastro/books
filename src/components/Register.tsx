@@ -7,6 +7,7 @@ import axios from "axios";
 
 export function RegisterForm() {
   const [form, setForm] = useState({
+    name: "", // Adicionado campo 'name'
     email: "",
     username: "",
     password: "",
@@ -30,26 +31,31 @@ export function RegisterForm() {
     }
 
     try {
-      const response = await axios.post("http://localhost:4000/register", {
+      // A URL e o corpo da requisição foram atualizados
+      const response = await axios.post("http://localhost:5000/api/users", {
+        name: form.name,
         email: form.email,
         username: form.username,
         password: form.password,
       });
 
-      setMessage(response.data.message);
+      // O backend já retorna uma mensagem de sucesso, mas podemos definir uma padrão
+      setMessage("Usuário cadastrado com sucesso! Você já pode fazer o login.");
       setForm({
+        name: "", // Limpar campo 'name'
         email: "",
         username: "",
         password: "",
         confirmPassword: "",
       });
     } catch (err: unknown) {
-  if (axios.isAxiosError(err) && err.response) {
-    setMessage(err.response.data.message);
-  } else {
-    setMessage("Erro ao conectar com o servidor.");
-  }
-}
+      if (axios.isAxiosError(err) && err.response) {
+        // Ajustado para pegar a mensagem de erro do nosso backend
+        setMessage(err.response.data.message || "Não foi possível cadastrar.");
+      } else {
+        setMessage("Erro ao conectar com o servidor.");
+      }
+    }
   };
 
   return (
@@ -59,6 +65,20 @@ export function RegisterForm() {
         <p>Cadastre-se no Club.</p>
 
         {message && <p className="message">{message}</p>}
+
+        <div className="input-group">
+          <label>
+            Nome
+            <input
+              type="text"
+              name="name"
+              placeholder="Digite seu nome completo"
+              value={form.name}
+              onChange={handleChange}
+              required
+            />
+          </label>
+        </div>
 
         <div className="input-group">
           <label>

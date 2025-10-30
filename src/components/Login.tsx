@@ -7,7 +7,7 @@ import axios from "axios";
 
 export function LoginForm() {
   const [form, setForm] = useState({
-    identifier: "",
+    email: "", // Alterado de identifier para email
     password: "",
   });
 
@@ -23,8 +23,9 @@ export function LoginForm() {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:4000/login", {
-        emailOrUsername: form.identifier,
+      // A URL e o corpo da requisição foram atualizados
+      const response = await axios.post("http://localhost:5000/api/users/login", {
+        email: form.email,
         password: form.password,
       });
 
@@ -37,7 +38,8 @@ export function LoginForm() {
       navigate("/home");
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && err.response) {
-        setMessage(err.response.data.message);
+        // Ajustado para pegar a mensagem de erro do nosso backend
+        setMessage(err.response.data.message || "Credenciais inválidas.");
       } else {
         setMessage("Erro ao conectar com o servidor.");
       }
@@ -54,12 +56,12 @@ export function LoginForm() {
 
         <div className="input-group">
           <label>
-            Email ou usuário
+            Email
             <input
               type="text"
-              name="identifier"
-              placeholder="Digite seu email ou usuário"
-              value={form.identifier}
+              name="email" // Alterado de identifier para email
+              placeholder="Digite seu email"
+              value={form.email} // Alterado de form.identifier para form.email
               onChange={handleChange}
               required
             />
