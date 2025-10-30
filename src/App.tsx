@@ -4,6 +4,7 @@ import { Home } from "./components/Home";
 import { RegisterForm } from "./components/Register";
 import { RecoverPassword } from "./components/RecoverPassword";
 import { ClubesPage } from "./components/Clubes";
+import { CadastrarLivroPage } from "./components/CadastrarLivro";
 import "./App.css";
 
 function App() {
@@ -26,6 +27,9 @@ function App() {
 
       {/* Rota para a Minha Biblioteca */}
       <Route path="/clubes" element={<ClubesPage />} />
+      
+      {/* Rota para Cadastrar Livro */}
+      <Route path="/cadastrar-livro" element={<CadastrarLivroPage />} />
     </Routes>
   );
 }

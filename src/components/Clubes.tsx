@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./Clubes.css";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 
 // Definindo os tipos para Livro e Modal
@@ -95,6 +95,7 @@ export function ClubesPage() {
   // Estado para os livros e para o modal
   const [livros] = useState<Livro[]>(mockLivros);
   const [selectedLivro, setSelectedLivro] = useState<Livro | null>(null);
+  const navigate = useNavigate();
 
   const handleOpenModal = (livro: Livro) => {
     setSelectedLivro(livro);
@@ -158,7 +159,7 @@ export function ClubesPage() {
               <button>Emprestei</button>
             </div>
           </div>
-          <button className="btn-add-livro">+ Cadastrar Livro</button>
+          <button className="btn-add-livro" onClick={() => navigate('/cadastrar-livro')}>+ Cadastrar Livro</button>
         </div>
 
         <div className="livros-grid">
