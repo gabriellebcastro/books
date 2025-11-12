@@ -12,7 +12,13 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+// A linha abaixo foi substituída para configurar o CORS corretamente
+app.use(cors({
+  origin: 'http://localhost:5173', // Endereço do seu frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(express.json());
 
 app.get('/', (req, res) => {

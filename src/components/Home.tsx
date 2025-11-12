@@ -5,34 +5,40 @@ import illustration from "../assets/illustration-login.svg";
 import { Link } from "react-router-dom";
 
 type Usuario = {
+  name: string;
   username: string;
 };
 
 export function Home() {
-  const [primeiroNome, setPrimeiroNome] = useState("Usuário");
+  const [primeiroNome, setPrimeiroNome] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
     const fetchUsuario = async () => {
       try {
-        const res = await fetch("http://localhost:4000/api/usuario", {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.log("Token não encontrado, o usuário não está logado.");
+          return;
+        }
+
+        const res = await fetch("http://localhost:5000/api/users/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        if (!res.ok) throw new Error("Erro ao buscar usuário");
+        if (!res.ok) {
+          throw new Error(`Erro ao buscar usuário: ${res.statusText}`);
+        }
 
         const data: Usuario = await res.json();
 
-        if (data.username) {
-          const primeiro = data.username.split(" ")[0];
+        if (data.name) {
+          const primeiro = data.name.split(" ")[0];
           setPrimeiroNome(primeiro);
         }
       } catch (err) {
-        console.error("Erro ao carregar dados do usuário:", err);
+        console.error("Falha ao carregar dados do usuário:", err);
       }
     };
 
