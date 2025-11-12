@@ -3,7 +3,7 @@ import { LoginForm } from "./components/Login";
 import { Home } from "./components/Home";
 import { RegisterForm } from "./components/Register";
 import { RecoverPassword } from "./components/RecoverPassword";
-import { ClubesPage } from "./components/Clubes";
+import { MinhaBibliotecaPage } from "./components/MinhaBiblioteca";
 import { CadastrarLivro } from "./components/CadastrarLivro";
 import "./App.css";
 
@@ -26,7 +26,7 @@ function App() {
       <Route path="/home" element={<Home />} />
 
       {/* Rota para a Minha Biblioteca */}
-      <Route path="/clubes" element={<ClubesPage />} />
+      <Route path="/minha-biblioteca" element={<MinhaBibliotecaPage />} />
       
       {/* Rota para Cadastrar Livro */}
       <Route path="/cadastrar-livro" element={<CadastrarLivro />} />

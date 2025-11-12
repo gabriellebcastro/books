@@ -55,10 +55,10 @@ export function Home() {
           <p className="subtitle">Vamos embarcar em uma nova leitura?</p>
 
           <div className="buttons">
-            <Link to="/clubes?tab=meus" className="btn black">
+            <Link to="/minha-biblioteca" className="btn black">
               Ver meus livros
             </Link>
-            <Link to="/clubes?tab=encontrar" className="btn white">
+            <Link to="/minha-biblioteca" className="btn white">
               Adicionar livros
             </Link>
           </div>

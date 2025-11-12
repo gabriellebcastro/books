@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import "./Clubes.css";
+import "./MinhaBiblioteca.css";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import axios from 'axios';
@@ -15,7 +15,7 @@ type Book = {
   cover: string;
 };
 
-export function ClubesPage() {
+export function MinhaBibliotecaPage() {
   const [myBooks, setMyBooks] = useState<Book[]>([]);
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
