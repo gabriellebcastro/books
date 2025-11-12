@@ -87,6 +87,17 @@
   justify-content: center;
 }
 
+.filter-select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  height: 42px; /* Alinha altura com a barra de pesquisa */
+  cursor: pointer;
+}
+
 .filtros-rapidos {
   display: flex;
   align-items: center;

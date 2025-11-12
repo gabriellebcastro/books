@@ -121,7 +121,7 @@ export function Navbar() {
 
       <ul className="navbar-links">
         <li><Link to="/home">Início</Link></li>
-        <li><Link to="/clubes">Minha biblioteca</Link></li>
+        <li><Link to="/minha-biblioteca">Minha biblioteca</Link></li>
         <li><Link to="/eventos">Perfil</Link></li>
       </ul>
 

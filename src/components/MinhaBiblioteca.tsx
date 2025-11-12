@@ -24,6 +24,10 @@ export function MinhaBibliotecaPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Novos estados para filtro e ordenação
+  const [selectedGenre, setSelectedGenre] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<string>("title-asc");
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
@@ -137,6 +141,29 @@ export function MinhaBibliotecaPage() {
     return myBooks.some(book => book._id === bookId);
   }
 
+  // Extrai gêneros únicos da lista de livros
+  const genres = [...new Set(myBooks.map(book => book.genre))];
+
+  // Aplica filtro e ordenação
+  const filteredAndSortedBooks = myBooks
+    .filter(book => {
+      return selectedGenre ? book.genre === selectedGenre : true;
+    })
+    .sort((a, b) => {
+      switch (sortOrder) {
+        case 'title-asc':
+          return a.title.localeCompare(b.title);
+        case 'title-desc':
+          return b.title.localeCompare(a.title);
+        case 'author-asc':
+          return a.author.localeCompare(b.author);
+        case 'author-desc':
+          return b.author.localeCompare(a.author);
+        default:
+          return 0;
+      }
+    });
+
   return (
     <>
       <Navbar />
@@ -160,6 +187,20 @@ export function MinhaBibliotecaPage() {
               />
               <button className="search-icon" onClick={handleSearch}>🔍</button>
             </div>
+            {/* Filtro de Gênero */}
+            <select className="filter-select" value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)}>
+              <option value="">Todos os Gêneros</option>
+              {genres.map(genre => (
+                <option key={genre} value={genre}>{genre}</option>
+              ))}
+            </select>
+            {/* Ordenação */}
+            <select className="filter-select" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+              <option value="title-asc">Título (A-Z)</option>
+              <option value="title-desc">Título (Z-A)</option>
+              <option value="author-asc">Autor (A-Z)</option>
+              <option value="author-desc">Autor (Z-A)</option>
+            </select>
           </div>
           <button className="btn-add-livro" onClick={() => navigate('/cadastrar-livro')}>+ Cadastrar Novo Livro</button>
         </div>
@@ -200,7 +241,7 @@ export function MinhaBibliotecaPage() {
           <p>Sua estante está vazia. Busque um livro e adicione-o!</p>
         )}
         <div className="livros-grid">
-          {myBooks.map((book) => (
+          {filteredAndSortedBooks.map((book) => (
             <div
               className="livro-card"
               key={book._id}
