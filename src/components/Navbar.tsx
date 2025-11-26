@@ -116,7 +116,7 @@ export function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <div className="logo">Books</div>
+        <Link to="/home" className="logo">Books</Link>
       </div>
 
       <ul className="navbar-links">

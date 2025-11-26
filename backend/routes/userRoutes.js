@@ -9,6 +9,7 @@ import {
   getUserBooks,
   addBookToUserLibrary,
   removeBookFromUserLibrary,
+  updateUserBookDetails,
 } from '../controllers/bookController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
@@ -28,6 +29,9 @@ router
   .post(protect, addBookToUserLibrary);
 
 // Rota para remover um livro da estante do usuário (protegida)
-router.route('/mybooks/:id').delete(protect, removeBookFromUserLibrary);
+router
+  .route('/mybooks/:id')
+  .delete(protect, removeBookFromUserLibrary)
+  .put(protect, updateUserBookDetails);
 
 export default router;

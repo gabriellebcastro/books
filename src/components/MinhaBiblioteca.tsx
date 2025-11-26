@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import "./MinhaBiblioteca.css";
+import "./BookModal.css";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "./Navbar";
 import axios from 'axios';
 
-// Tipo 'Book' atualizado para corresponder ao modelo do backend
 type Book = {
   _id: string;
   title: string;
@@ -13,25 +13,31 @@ type Book = {
   genre: string;
   pages: number;
   cover: string;
+  synopsis: string;
+};
+
+type UserBook = {
+  book: Book;
+  status: string;
+  favorite: boolean;
+  rating: number;
+  _id: string;
 };
 
 export function MinhaBibliotecaPage() {
-  const [myBooks, setMyBooks] = useState<Book[]>([]);
+  const [myBooks, setMyBooks] = useState<UserBook[]>([]);
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [selectedBook, setSelectedBook] = useState<UserBook | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Novos estados para filtro e ordenação
   const [selectedGenre, setSelectedGenre] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("title-asc");
+  const [hoverRating, setHoverRating] = useState(0);
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  // Busca os livros do usuário ao carregar o componente
   const fetchMyBooks = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -41,7 +47,7 @@ export function MinhaBibliotecaPage() {
           Authorization: `Bearer ${token}`,
         },
       };
-      const { data } = await axios.get('http://localhost:5000/api/users/mybooks', config);
+      const { data } = await axios.get<UserBook[]>('http://localhost:5000/api/users/mybooks', config);
       setMyBooks(data);
     } catch (err) {
       setError("Não foi possível carregar seus livros. Tente novamente mais tarde.");
@@ -73,7 +79,7 @@ export function MinhaBibliotecaPage() {
         },
         params: { keyword: searchQuery },
       };
-      const { data } = await axios.get('http://localhost:5000/api/books/search', config);
+      const { data } = await axios.get('http://localhost:5000/api/books', config);
       setSearchResults(data);
     } catch (err) {
       setError("Erro ao buscar livros.");
@@ -92,7 +98,6 @@ export function MinhaBibliotecaPage() {
       };
       await axios.post('http://localhost:5000/api/users/mybooks', { bookId }, config);
       alert('Livro adicionado à sua estante!');
-      // Atualiza a lista de livros e limpa a busca
       fetchMyBooks();
       setSearchResults([]);
       setSearchQuery("");
@@ -118,9 +123,9 @@ export function MinhaBibliotecaPage() {
         },
       };
       await axios.delete(`http://localhost:5000/api/users/mybooks/${bookId}`, config);
-      setMyBooks(myBooks.filter(book => book._id !== bookId));
+      setMyBooks(myBooks.filter(userBook => userBook.book._id !== bookId));
       alert('Livro removido da sua estante.');
-      if (selectedBook && selectedBook._id === bookId) {
+      if (selectedBook && selectedBook.book._id === bookId) {
         handleCloseModal();
       }
     } catch (err) {
@@ -129,8 +134,26 @@ export function MinhaBibliotecaPage() {
     }
   };
 
-  const handleOpenModal = (book: Book) => {
-    setSelectedBook(book);
+  const handleUpdateBookDetails = async (bookId: string, details: { status?: string; favorite?: boolean; rating?: number }) => {
+    const originalBooks = [...myBooks];
+    const updatedBooks = myBooks.map(ub => 
+      ub.book._id === bookId ? { ...ub, ...details } : ub
+    );
+    setMyBooks(updatedBooks);
+    setSelectedBook(prev => prev && prev.book._id === bookId ? { ...prev, ...details } : prev);
+
+    try {
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        await axios.put(`http://localhost:5000/api/users/mybooks/${bookId}`, details, config);
+    } catch (err) {
+        alert('Falha ao atualizar o livro.');
+        setMyBooks(originalBooks); // Revert on error
+        setSelectedBook(originalBooks.find(ub => ub.book._id === bookId) || null);
+    }
+  };
+
+  const handleOpenModal = (userBook: UserBook) => {
+    setSelectedBook(userBook);
   };
 
   const handleCloseModal = () => {
@@ -138,27 +161,25 @@ export function MinhaBibliotecaPage() {
   };
 
   const isBookInLibrary = (bookId: string) => {
-    return myBooks.some(book => book._id === bookId);
+    return myBooks.some(userBook => userBook.book._id === bookId);
   }
 
-  // Extrai gêneros únicos da lista de livros
-  const genres = [...new Set(myBooks.map(book => book.genre))];
+  const genres = [...new Set(myBooks.map(userBook => userBook.book.genre))];
 
-  // Aplica filtro e ordenação
   const filteredAndSortedBooks = myBooks
-    .filter(book => {
-      return selectedGenre ? book.genre === selectedGenre : true;
+    .filter(userBook => {
+      return selectedGenre ? userBook.book.genre === selectedGenre : true;
     })
     .sort((a, b) => {
       switch (sortOrder) {
         case 'title-asc':
-          return a.title.localeCompare(b.title);
+          return a.book.title.localeCompare(b.book.title);
         case 'title-desc':
-          return b.title.localeCompare(a.title);
+          return b.book.title.localeCompare(a.book.title);
         case 'author-asc':
-          return a.author.localeCompare(b.author);
+          return a.book.author.localeCompare(b.book.author);
         case 'author-desc':
-          return b.author.localeCompare(a.author);
+          return b.book.author.localeCompare(a.book.author);
         default:
           return 0;
       }
@@ -178,8 +199,8 @@ export function MinhaBibliotecaPage() {
         <div className="filtros-container">
           <div className="filtros">
             <div className="search-bar">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Pesquise por título, autor ou ISBN..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -190,9 +211,7 @@ export function MinhaBibliotecaPage() {
             {/* Filtro de Gênero */}
             <select className="filter-select" value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)}>
               <option value="">Todos os Gêneros</option>
-              {genres.map(genre => (
-                <option key={genre} value={genre}>{genre}</option>
-              ))}
+              {genres.map(genre => <option key={genre} value={genre}>{genre}</option>)}
             </select>
             {/* Ordenação */}
             <select className="filter-select" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
@@ -202,85 +221,115 @@ export function MinhaBibliotecaPage() {
               <option value="author-desc">Autor (Z-A)</option>
             </select>
           </div>
-          <button className="btn-add-livro" onClick={() => navigate('/cadastrar-livro')}>+ Cadastrar Novo Livro</button>
+          <button className="btn-add-livro" onClick={() => navigate('/cadastrar-livro')}>
+            + Adicionar Livro
+          </button>
         </div>
 
-        {error && <p className="error-message">{error}</p>}
         {loading && <p>Carregando...</p>}
+        {error && <p className="error-message">{error}</p>}
 
-        {/* Resultados da Busca */}
+        {/* Resultados da busca */}
         {searchResults.length > 0 && (
           <div className="search-results">
             <h2>Resultados da Busca</h2>
-            <div className="livros-grid">
-              {searchResults.map((book) => (
-                <div className="livro-card-container" key={book._id}>
-                  <div
-                    className="livro-card"
-                    onClick={() => handleOpenModal(book)}
-                  >
-                    <img src={book.cover} alt={`Capa do livro ${book.title}`} />
-                  </div>
-                  {!isBookInLibrary(book._id) ? (
-                    <button className="btn-add-to-library" onClick={() => handleAddBook(book._id)}>
-                      Adicionar à Estante
-                    </button>
+            <div className="clubes-grid">
+              {searchResults.map(book => (
+                <div key={book._id} className="clube-card">
+                  <img src={book.cover} alt={book.title} />
+                  <h3>{book.title}</h3>
+                  <p>{book.author}</p>
+                  {isBookInLibrary(book._id) ? (
+                    <button className="entrar" disabled>Na sua estante</button>
                   ) : (
-                    <p className="in-library-text">Na sua estante</p>
+                    <button className="entrar" onClick={() => handleAddBook(book._id)}>Adicionar</button>
                   )}
                 </div>
               ))}
             </div>
-            <hr />
           </div>
         )}
 
-        {/* Estante do Usuário */}
-        <h2>Minha Estante</h2>
-        {myBooks.length === 0 && !loading && (
-          <p>Sua estante está vazia. Busque um livro e adicione-o!</p>
-        )}
-        <div className="livros-grid">
-          {filteredAndSortedBooks.map((book) => (
-            <div
-              className="livro-card"
-              key={book._id}
-              onClick={() => handleOpenModal(book)}
-            >
-              <img src={book.cover} alt={`Capa do livro ${book.title}`} />
+        {/* Livros da biblioteca do usuário */}
+        <div className="clubes-grid">
+          {filteredAndSortedBooks.map(userBook => (
+            <div key={userBook.book._id} className="clube-card">
+              <img src={userBook.book.cover} alt={userBook.book.title} onClick={() => handleOpenModal(userBook)} />
+              <div className={`favorite-icon ${userBook.favorite ? 'favorited' : ''}`} onClick={() => handleUpdateBookDetails(userBook.book._id, { favorite: !userBook.favorite })}>
+                &#x2605;
+              </div>
+              {userBook.status && (
+                <div className="book-status" data-status={userBook.status}>
+                  {userBook.status}
+                </div>
+              )}
+              <h3>{userBook.book.title}</h3>
+              <p>{userBook.book.author}</p>
             </div>
           ))}
         </div>
-      </div>
 
-      {selectedBook && (
-        <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close-button" onClick={handleCloseModal}>
-              &times;
-            </button>
-            <div className="modal-body">
-              <img className="modal-capa" src={selectedBook.cover} alt={`Capa de ${selectedBook.title}`} />
-              <div className="modal-details">
-                <h2>{selectedBook.title}</h2>
-                <h3>por {selectedBook.author}</h3>
-                <p><strong>Gênero:</strong> {selectedBook.genre}</p>
-                <p><strong>Páginas:</strong> {selectedBook.pages}</p>
-                <p><strong>ISBN:</strong> {selectedBook.isbn}</p>
-                {isBookInLibrary(selectedBook._id) ? (
-                   <button className="btn-remove-from-library" onClick={() => handleRemoveBook(selectedBook._id)}>
-                     Remover da Estante
-                   </button>
-                ) : (
-                   <button className="btn-add-to-library-modal" onClick={() => handleAddBook(selectedBook._id)}>
-                     Adicionar à Estante
-                   </button>
-                )}
+        {selectedBook && (
+          <div className="modal-overlay" onClick={handleCloseModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close" onClick={handleCloseModal}>&times;</button>
+              <div className="modal-body">
+                <img src={selectedBook.book.cover} alt={selectedBook.book.title} className="modal-book-cover" />
+                <div className="modal-book-details">
+                  <h2>{selectedBook.book.title}</h2>
+                  <h3>{selectedBook.book.author}</h3>
+                  <p><strong>Gênero:</strong> {selectedBook.book.genre}</p>
+                  <p><strong>Páginas:</strong> {selectedBook.book.pages}</p>
+                  <p><strong>ISBN:</strong> {selectedBook.book.isbn}</p>
+                  <div className="modal-book-synopsis">
+                    <p><strong>Sinopse:</strong></p>
+                    <p>{selectedBook.book.synopsis}</p>
+                  </div>
+                  
+                  <div className="rating-container">
+                    <p><strong>Sua Avaliação:</strong></p>
+                    <div className="stars">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`star ${star <= (hoverRating || (selectedBook && selectedBook.rating) || 0) ? 'filled' : ''}`}
+                          onClick={() => {
+                            if (selectedBook) {
+                              const newRating = star === selectedBook.rating ? 0 : star;
+                              handleUpdateBookDetails(selectedBook.book._id, { rating: newRating });
+                            }
+                          }}
+                          onMouseEnter={() => setHoverRating(star)}
+                          onMouseLeave={() => setHoverRating(0)}
+                        >
+                          &#9733;
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="modal-actions">
+                    <div className="status-update">
+                      <p><strong>Mudar status:</strong></p>
+                      <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'quero ler' })} className={selectedBook.status === 'quero ler' ? 'active' : ''}>Quero Ler</button>
+                      <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'lendo' })} className={selectedBook.status === 'lendo' ? 'active' : ''}>Lendo</button>
+                      <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'lido' })} className={selectedBook.status === 'lido' ? 'active' : ''}>Lido</button>
+                    </div>
+                    <div className="other-actions">
+                      <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { favorite: !selectedBook.favorite })}>
+                        {selectedBook.favorite ? 'Desfavoritar' : 'Favoritar'}
+                      </button>
+                      <button className="remove-button" onClick={() => { handleRemoveBook(selectedBook.book._id); handleCloseModal(); }}>
+                        Remover da Estante
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }

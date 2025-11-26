@@ -10,6 +10,7 @@ export function CadastrarLivro() {
   const [genre, setGenre] = useState(''); 
   const [pages, setPages] = useState(''); 
   const [cover, setCover] = useState(''); 
+  const [synopsis, setSynopsis] = useState('');
   const [message, setMessage] = useState(''); 
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -23,7 +24,7 @@ export function CadastrarLivro() {
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/books',
+        'http://localhost:5000/api/books/catalog',
         {
           title,
           author,
@@ -31,6 +32,7 @@ export function CadastrarLivro() {
           genre,
           pages: Number(pages),
           cover,
+          synopsis,
         },
         {
           headers: {
@@ -48,6 +50,7 @@ export function CadastrarLivro() {
         setGenre('');
         setPages('');
         setCover('');
+        setSynopsis('');
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -123,6 +126,14 @@ export function CadastrarLivro() {
                 value={cover}
                 onChange={(e) => setCover(e.target.value)}
                 required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="sinopse">Sinopse</label>
+              <textarea
+                id="sinopse"
+                value={synopsis}
+                onChange={(e) => setSynopsis(e.target.value)}
               />
             </div>
             <button type="submit" className="btn-submit">Cadastrar Livro</button>
