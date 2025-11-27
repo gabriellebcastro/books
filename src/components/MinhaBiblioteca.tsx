@@ -34,6 +34,7 @@ export function MinhaBibliotecaPage() {
   const [selectedGenre, setSelectedGenre] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<string>("title-asc");
   const [hoverRating, setHoverRating] = useState(0);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -136,7 +137,7 @@ export function MinhaBibliotecaPage() {
 
   const handleUpdateBookDetails = async (bookId: string, details: { status?: string; favorite?: boolean; rating?: number }) => {
     const originalBooks = [...myBooks];
-    const updatedBooks = myBooks.map(ub => 
+    const updatedBooks = myBooks.map(ub =>
       ub.book._id === bookId ? { ...ub, ...details } : ub
     );
     setMyBooks(updatedBooks);
@@ -145,7 +146,7 @@ export function MinhaBibliotecaPage() {
     try {
         const config = { headers: { Authorization: `Bearer ${token}` } };
         await axios.put(`http://localhost:5000/api/users/mybooks/${bookId}`, details, config);
-    } catch (err) {
+    } catch {
         alert('Falha ao atualizar o livro.');
         setMyBooks(originalBooks); // Revert on error
         setSelectedBook(originalBooks.find(ub => ub.book._id === bookId) || null);
@@ -168,6 +169,8 @@ export function MinhaBibliotecaPage() {
 
   const filteredAndSortedBooks = myBooks
     .filter(userBook => {
+      if (activeFilter === 'favorites') return userBook.favorite;
+      if (['lido', 'lendo', 'quero ler'].includes(activeFilter)) return userBook.status === activeFilter;
       return selectedGenre ? userBook.book.genre === selectedGenre : true;
     })
     .sort((a, b) => {
@@ -188,16 +191,38 @@ export function MinhaBibliotecaPage() {
   return (
     <>
       <Navbar />
-      <div className="clubes-hero">
-        <h1>Minha biblioteca</h1>
-        <p className="subheading">
-          Pesquise livros no catálogo ou visualize sua biblioteca.
-        </p>
-      </div>
+      <div className="biblioteca-container">
+        <aside className="biblioteca-sidebar">
+          <nav>
+            <ul>
+              <li className={activeFilter === 'all' ? 'active' : ''} onClick={() => setActiveFilter('all')}>
+                Todos os livros
+              </li>
+              <li className={activeFilter === 'favorites' ? 'active' : ''} onClick={() => setActiveFilter('favorites')}>
+                Favoritos
+              </li>
+              <li className={activeFilter === 'lido' ? 'active' : ''} onClick={() => setActiveFilter('lido')}>
+                Lidos
+              </li>
+              <li className={activeFilter === 'lendo' ? 'active' : ''} onClick={() => setActiveFilter('lendo')}>
+                Lendo
+              </li>
+              <li className={activeFilter === 'quero ler' ? 'active' : ''} onClick={() => setActiveFilter('quero ler')}>
+                Quero Ler
+              </li>
+            </ul>
+          </nav>
+        </aside>
 
-      <div className="clubes-page">
-        <div className="filtros-container">
-          <div className="filtros">
+        <main className="biblioteca-main-content">
+          <div className="biblioteca-hero">
+            <h1>Minha biblioteca</h1>
+            <p className="subheading">
+              Pesquise livros no catálogo ou visualize sua biblioteca.
+            </p>
+          </div>
+
+          <div className="filtros-container">
             <div className="search-bar">
               <input
                 type="text"
@@ -208,127 +233,127 @@ export function MinhaBibliotecaPage() {
               />
               <button className="search-icon" onClick={handleSearch}>🔍</button>
             </div>
-            {/* Filtro de Gênero */}
-            <select className="filter-select" value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)}>
-              <option value="">Todos os Gêneros</option>
-              {genres.map(genre => <option key={genre} value={genre}>{genre}</option>)}
-            </select>
-            {/* Ordenação */}
-            <select className="filter-select" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-              <option value="title-asc">Título (A-Z)</option>
-              <option value="title-desc">Título (Z-A)</option>
-              <option value="author-asc">Autor (A-Z)</option>
-              <option value="author-desc">Autor (Z-A)</option>
-            </select>
-          </div>
-          <button className="btn-add-livro" onClick={() => navigate('/cadastrar-livro')}>
-            + Adicionar Livro
-          </button>
-        </div>
-
-        {loading && <p>Carregando...</p>}
-        {error && <p className="error-message">{error}</p>}
-
-        {/* Resultados da busca */}
-        {searchResults.length > 0 && (
-          <div className="search-results">
-            <h2>Resultados da Busca</h2>
-            <div className="clubes-grid">
-              {searchResults.map(book => (
-                <div key={book._id} className="clube-card">
-                  <img src={book.cover} alt={book.title} />
-                  <h3>{book.title}</h3>
-                  <p>{book.author}</p>
-                  {isBookInLibrary(book._id) ? (
-                    <button className="entrar" disabled>Na sua estante</button>
-                  ) : (
-                    <button className="entrar" onClick={() => handleAddBook(book._id)}>Adicionar</button>
-                  )}
-                </div>
-              ))}
+            <div className="filtros-selecao">
+              <select className="filter-select" value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)}>
+                <option value="">Todos os Gêneros</option>
+                {genres.map(genre => <option key={genre} value={genre}>{genre}</option>)}
+              </select>
+              <select className="filter-select" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+                <option value="title-asc">Título (A-Z)</option>
+                <option value="title-desc">Título (Z-A)</option>
+                <option value="author-asc">Autor (A-Z)</option>
+                <option value="author-desc">Autor (Z-A)</option>
+              </select>
+              <button className="btn-add-livro" onClick={() => navigate('/cadastrar-livro')}>
+                + Adicionar Livro
+              </button>
             </div>
           </div>
-        )}
 
-        {/* Livros da biblioteca do usuário */}
-        <div className="clubes-grid">
-          {filteredAndSortedBooks.map(userBook => (
-            <div key={userBook.book._id} className="clube-card">
-              <img src={userBook.book.cover} alt={userBook.book.title} onClick={() => handleOpenModal(userBook)} />
-              <div className={`favorite-icon ${userBook.favorite ? 'favorited' : ''}`} onClick={() => handleUpdateBookDetails(userBook.book._id, { favorite: !userBook.favorite })}>
-                &#x2605;
-              </div>
-              {userBook.status && (
-                <div className="book-status" data-status={userBook.status}>
-                  {userBook.status}
-                </div>
-              )}
-              <h3>{userBook.book.title}</h3>
-              <p>{userBook.book.author}</p>
-            </div>
-          ))}
-        </div>
+          {loading && <p>Carregando...</p>}
+          {error && <p className="error-message">{error}</p>}
 
-        {selectedBook && (
-          <div className="modal-overlay" onClick={handleCloseModal}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close" onClick={handleCloseModal}>&times;</button>
-              <div className="modal-body">
-                <img src={selectedBook.book.cover} alt={selectedBook.book.title} className="modal-book-cover" />
-                <div className="modal-book-details">
-                  <h2>{selectedBook.book.title}</h2>
-                  <h3>{selectedBook.book.author}</h3>
-                  <p><strong>Gênero:</strong> {selectedBook.book.genre}</p>
-                  <p><strong>Páginas:</strong> {selectedBook.book.pages}</p>
-                  <p><strong>ISBN:</strong> {selectedBook.book.isbn}</p>
-                  <div className="modal-book-synopsis">
-                    <p><strong>Sinopse:</strong></p>
-                    <p>{selectedBook.book.synopsis}</p>
+          {searchResults.length > 0 && (
+            <div className="search-results">
+              <h2>Resultados da Busca</h2>
+              <div className="books-grid">
+                {searchResults.map(book => (
+                  <div key={book._id} className="book-card">
+                    <img src={book.cover} alt={book.title} />
+                    <div className="book-card-info">
+                      <h3>{book.title}</h3>
+                      <p>{book.author}</p>
+                      {isBookInLibrary(book._id) ? (
+                        <button className="btn-action" disabled>Na sua estante</button>
+                      ) : (
+                        <button className="btn-action" onClick={() => handleAddBook(book._id)}>Adicionar</button>
+                      )}
+                    </div>
                   </div>
-                  
-                  <div className="rating-container">
-                    <p><strong>Sua Avaliação:</strong></p>
-                    <div className="stars">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <span
-                          key={star}
-                          className={`star ${star <= (hoverRating || (selectedBook && selectedBook.rating) || 0) ? 'filled' : ''}`}
-                          onClick={() => {
-                            if (selectedBook) {
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="books-grid">
+            {filteredAndSortedBooks.map(userBook => (
+              <div key={userBook.book._id} className="book-card">
+                <img src={userBook.book.cover} alt={userBook.book.title} onClick={() => handleOpenModal(userBook)} />
+                <div className={`favorite-icon ${userBook.favorite ? 'favorited' : ''}`} onClick={() => handleUpdateBookDetails(userBook.book._id, { favorite: !userBook.favorite })}>
+                  &#9733;
+                </div>
+                {userBook.status && (
+                  <div className="book-status" data-status={userBook.status}>
+                    {userBook.status}
+                  </div>
+                )}
+                <div className="book-card-info">
+                  <h3>{userBook.book.title}</h3>
+                  <p>{userBook.book.author}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {selectedBook && (
+            <div className="modal-overlay" onClick={handleCloseModal}>
+              <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <button className="modal-close" onClick={handleCloseModal}>&times;</button>
+                <div className="modal-body">
+                  <img src={selectedBook.book.cover} alt={selectedBook.book.title} className="modal-book-cover" />
+                  <div className="modal-book-details">
+                    <h2>{selectedBook.book.title}</h2>
+                    <h3>{selectedBook.book.author}</h3>
+                    <p><strong>Gênero:</strong> {selectedBook.book.genre}</p>
+                    <p><strong>Páginas:</strong> {selectedBook.book.pages}</p>
+                    <p><strong>ISBN:</strong> {selectedBook.book.isbn}</p>
+                    <div className="modal-book-synopsis">
+                      <p><strong>Sinopse:</strong></p>
+                      <p>{selectedBook.book.synopsis}</p>
+                    </div>
+                    
+                    <div className="rating-container">
+                      <p><strong>Sua Avaliação:</strong></p>
+                      <div className="stars">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span
+                            key={star}
+                            className={`star ${star <= (hoverRating || selectedBook.rating) ? 'filled' : ''}`}
+                            onClick={() => {
                               const newRating = star === selectedBook.rating ? 0 : star;
                               handleUpdateBookDetails(selectedBook.book._id, { rating: newRating });
-                            }
-                          }}
-                          onMouseEnter={() => setHoverRating(star)}
-                          onMouseLeave={() => setHoverRating(0)}
-                        >
-                          &#9733;
-                        </span>
-                      ))}
+                            }}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                          >
+                            &#9733;
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="modal-actions">
-                    <div className="status-update">
-                      <p><strong>Mudar status:</strong></p>
-                      <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'quero ler' })} className={selectedBook.status === 'quero ler' ? 'active' : ''}>Quero Ler</button>
-                      <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'lendo' })} className={selectedBook.status === 'lendo' ? 'active' : ''}>Lendo</button>
-                      <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'lido' })} className={selectedBook.status === 'lido' ? 'active' : ''}>Lido</button>
-                    </div>
-                    <div className="other-actions">
-                      <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { favorite: !selectedBook.favorite })}>
-                        {selectedBook.favorite ? 'Desfavoritar' : 'Favoritar'}
-                      </button>
-                      <button className="remove-button" onClick={() => { handleRemoveBook(selectedBook.book._id); handleCloseModal(); }}>
-                        Remover da Estante
-                      </button>
+                    <div className="modal-actions">
+                      <div className="status-update">
+                        <p><strong>Mudar status:</strong></p>
+                        <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'quero ler' })} className={selectedBook.status === 'quero ler' ? 'active' : ''}>Quero Ler</button>
+                        <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'lendo' })} className={selectedBook.status === 'lendo' ? 'active' : ''}>Lendo</button>
+                        <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'lido' })} className={selectedBook.status === 'lido' ? 'active' : ''}>Lido</button>
+                      </div>
+                      <div className="other-actions">
+                        <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { favorite: !selectedBook.favorite })}>
+                          {selectedBook.favorite ? 'Desfavoritar' : 'Favoritar'}
+                        </button>
+                        <button className="remove-button" onClick={() => { handleRemoveBook(selectedBook.book._id); handleCloseModal(); }}>
+                          Remover da Estante
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </main>
       </div>
     </>
   );
