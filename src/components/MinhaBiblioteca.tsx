@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import "./MinhaBiblioteca.css";
 import "./BookModal.css";
-import { useNavigate } from "react-router-dom";
-import { Navbar } from "./Navbar";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
 
 type Book = {
@@ -38,6 +37,18 @@ export function MinhaBibliotecaPage() {
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
+  const { filter } = useParams<{ filter?: string }>();
+
+  useEffect(() => {
+    const filterMap: { [key: string]: string } = {
+      'todos': 'all',
+      'favoritos': 'favorites',
+      'lido': 'lido',
+      'lendo': 'lendo',
+      'quero-ler': 'quero ler',
+    };
+    setActiveFilter(filterMap[filter || 'todos'] || 'all');
+  }, [filter]);
 
   const fetchMyBooks = useCallback(async () => {
     setLoading(true);
@@ -169,9 +180,14 @@ export function MinhaBibliotecaPage() {
 
   const filteredAndSortedBooks = myBooks
     .filter(userBook => {
-      if (activeFilter === 'favorites') return userBook.favorite;
-      if (['lido', 'lendo', 'quero ler'].includes(activeFilter)) return userBook.status === activeFilter;
-      return selectedGenre ? userBook.book.genre === selectedGenre : true;
+      const statusFilterMatch =
+        activeFilter === 'all' ? true :
+        activeFilter === 'favorites' ? userBook.favorite :
+        userBook.status === activeFilter;
+
+      const genreFilterMatch = selectedGenre ? userBook.book.genre === selectedGenre : true;
+
+      return statusFilterMatch && genreFilterMatch;
     })
     .sort((a, b) => {
       switch (sortOrder) {
@@ -189,40 +205,16 @@ export function MinhaBibliotecaPage() {
     });
 
   return (
-    <>
-      <Navbar />
-      <div className="biblioteca-container">
-        <aside className="biblioteca-sidebar">
-          <nav>
-            <ul>
-              <li className={activeFilter === 'all' ? 'active' : ''} onClick={() => setActiveFilter('all')}>
-                Todos os livros
-              </li>
-              <li className={activeFilter === 'favorites' ? 'active' : ''} onClick={() => setActiveFilter('favorites')}>
-                Favoritos
-              </li>
-              <li className={activeFilter === 'lido' ? 'active' : ''} onClick={() => setActiveFilter('lido')}>
-                Lidos
-              </li>
-              <li className={activeFilter === 'lendo' ? 'active' : ''} onClick={() => setActiveFilter('lendo')}>
-                Lendo
-              </li>
-              <li className={activeFilter === 'quero ler' ? 'active' : ''} onClick={() => setActiveFilter('quero ler')}>
-                Quero Ler
-              </li>
-            </ul>
-          </nav>
-        </aside>
+    <div className="biblioteca-container">
+      <main className="biblioteca-main-content">
+        <div className="biblioteca-hero">
+          <h1>Minha biblioteca</h1>
+          <p className="subheading">
+            Pesquise livros no catálogo ou visualize sua biblioteca.
+          </p>
+        </div>
 
-        <main className="biblioteca-main-content">
-          <div className="biblioteca-hero">
-            <h1>Minha biblioteca</h1>
-            <p className="subheading">
-              Pesquise livros no catálogo ou visualize sua biblioteca.
-            </p>
-          </div>
-
-          <div className="filtros-container">
+        <div className="filtros-container">
             <div className="search-bar">
               <input
                 type="text"
@@ -355,6 +347,5 @@ export function MinhaBibliotecaPage() {
           )}
         </main>
       </div>
-    </>
-  );
+    );
 }

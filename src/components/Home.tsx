@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Navbar } from "../components/Navbar";
 import "./Home.css";
 import illustration from "../assets/illustration-login.svg";
 import { Link } from "react-router-dom";
@@ -47,7 +46,6 @@ export function Home() {
 
   return (
     <div className="home-container">
-      <Navbar />
       <div className="home-content">
         <div className="text-section">
           <p className="greeting">Oi,</p>

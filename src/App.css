@@ -1,0 +1,12 @@
+/* ... existing styles ... */
+
+.app-layout {
+  display: flex;
+}
+
+.main-content {
+  margin-left: 260px; /* Corresponds to --sidebar-width */
+  padding: 0; /* Remove padding to allow pages to control their own spacing */
+  width: calc(100% - 260px);
+  box-sizing: border-box;
+}
