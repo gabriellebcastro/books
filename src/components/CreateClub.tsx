@@ -1,19 +1,25 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CreateClub.css';
 
 export function CreateClub() {
-  const [clubName, setClubName] = useState('');
-  const [description, setDescription] = useState('');
-  const [genres, setGenres] = useState('');
-  const [visibility, setVisibility] = useState('public');
-  const [memberLimit, setMemberLimit] = useState('');
-  const [rules, setRules] = useState('');
+  const [nome, setNome] = useState('');
+  const [descricao, setDescricao] = useState('');
+  const [genero, setGenero] = useState('');
+  const [tipo, setTipo] = useState('Público');
+  const [limite, setLimite] = useState('');
+  const [regras, setRegras] = useState('');
+  const [capa, setCapa] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const navigate = useNavigate();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setCapa(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -22,44 +28,57 @@ export function CreateClub() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!clubName || !description) {
+    if (!nome || !descricao) {
       setError('Nome do Clube e Descrição são campos obrigatórios.');
       return;
     }
     setError('');
+    setSuccess('');
 
-    // DADOS PARA O BACKEND:
-    // Aqui você coletaria os dados do estado e enviaria para a sua API
-    const clubData = {
-      name: clubName,
-      description,
-      genres: genres.split(',').map(g => g.trim()),
-      visibility,
-      memberLimit: memberLimit ? parseInt(memberLimit, 10) : null,
-      rules,
-      // A imagem precisaria ser tratada como FormData para upload
-    };
+    const formData = new FormData();
+    formData.append('nome', nome);
+    formData.append('descricao', descricao);
+    formData.append('genero', genero);
+    formData.append('tipo', tipo);
+    if (limite) formData.append('limite', limite);
+    if (regras) formData.append('regras', regras);
+    if (capa) {
+      formData.append('capa', capa);
+    }
 
-    console.log('Dados do clube para enviar:', clubData);
-    // Exemplo de chamada de API (comentado):
-    /*
-    fetch('/api/clubs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(clubData),
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Clube criado com sucesso:', data);
-      // Redirecionar ou mostrar mensagem de sucesso
-    })
-    .catch(err => {
-      console.error('Erro ao criar clube:', err);
-      setError('Ocorreu um erro ao criar o clube.');
-    });
-    */
+    const token = localStorage.getItem('token');
+    if (!token) {
+        setError('Você precisa estar logado para criar um clube.');
+        return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/clubes', {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+  body: formData,
+});
+
+
+      if (!response.ok) {
+        // Se a resposta não for OK, tentamos ler a mensagem de erro do corpo JSON
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao criar o clube.');
+      }
+
+      // Se a resposta for OK (ex: 201 Created), não precisamos ler o corpo
+      setSuccess('Clube criado com sucesso! Redirecionando...');
+      setTimeout(() => {
+        navigate('/clubes');
+      }, 2000);
+
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -71,14 +90,15 @@ export function CreateClub() {
           
           <form onSubmit={handleSubmit} className="create-club-form">
             {error && <p className="error-message">{error}</p>}
+            {success && <p className="success-message">{success}</p>}
 
             <div className="form-group">
               <label htmlFor="clubName">Nome do Clube *</label>
               <input
                 type="text"
                 id="clubName"
-                value={clubName}
-                onChange={(e) => setClubName(e.target.value)}
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
                 required
               />
             </div>
@@ -87,8 +107,8 @@ export function CreateClub() {
               <label htmlFor="description">Descrição *</label>
               <textarea
                 id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
                 required
               />
             </div>
@@ -98,8 +118,8 @@ export function CreateClub() {
               <input
                 type="text"
                 id="genres"
-                value={genres}
-                onChange={(e) => setGenres(e.target.value)}
+                value={genero}
+                onChange={(e) => setGenero(e.target.value)}
               />
             </div>
 
@@ -109,18 +129,18 @@ export function CreateClub() {
                 <label>
                   <input
                     type="radio"
-                    value="public"
-                    checked={visibility === 'public'}
-                    onChange={(e) => setVisibility(e.target.value)}
+                    value="Público"
+                    checked={tipo === 'Público'}
+                    onChange={(e) => setTipo(e.target.value)}
                   />
                   Público
                 </label>
                 <label>
                   <input
                     type="radio"
-                    value="private"
-                    checked={visibility === 'private'}
-                    onChange={(e) => setVisibility(e.target.value)}
+                    value="Privado"
+                    checked={tipo === 'Privado'}
+                    onChange={(e) => setTipo(e.target.value)}
                   />
                   Privado
                 </label>
@@ -147,8 +167,8 @@ export function CreateClub() {
               <input
                 type="number"
                 id="memberLimit"
-                value={memberLimit}
-                onChange={(e) => setMemberLimit(e.target.value)}
+                value={limite}
+                onChange={(e) => setLimite(e.target.value)}
                 min="2"
               />
             </div>
@@ -157,14 +177,14 @@ export function CreateClub() {
               <label htmlFor="rules">Regras do Clube (opcional)</label>
               <textarea
                 id="rules"
-                value={rules}
-                onChange={(e) => setRules(e.target.value)}
+                value={regras}
+                onChange={(e) => setRegras(e.target.value)}
               />
             </div>
 
             <div className="form-actions">
               <button type="submit" className="btn btn-primary">Criar Clube</button>
-              <button type="button" className="btn btn-secondary">Cancelar</button>
+              <button type="button" className="btn btn-secondary" onClick={() => navigate('/clubes')}>Cancelar</button>
             </div>
           </form>
         </div>

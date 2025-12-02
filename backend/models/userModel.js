@@ -45,6 +45,12 @@ const userSchema = mongoose.Schema(
       required: true,
     },
     books: [userBookSchema],
+    clubes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Club',
+      },
+    ],
   },
   {
     timestamps: true,
