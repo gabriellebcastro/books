@@ -1,10 +1,8 @@
-import { Navbar } from './Navbar';
 import './Clubes.css';
 
 export function Clubes() {
     return (
         <div>
-            <Navbar />
             <div className="page-container">
                 {/* Esta div envolve todo o conteúdo central */}
                 <main className="main-content">

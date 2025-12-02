@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Navbar } from './Navbar';
 import './CreateClub.css';
 
 export function CreateClub() {
@@ -65,7 +64,6 @@ export function CreateClub() {
 
   return (
     <div>
-      <Navbar />
       <div className="create-club-container">
         <div className="create-club-card">
           <h1 className="create-club-title">Criar Novo Clube do Livro</h1>

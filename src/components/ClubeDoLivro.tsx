@@ -1,4 +1,3 @@
-import { Navbar } from './Navbar';
 import './ClubeDoLivro.css';
 
 // Componente placeholder para a imagem do livro e avatares
@@ -36,7 +35,6 @@ export function ClubeDoLivro() {
 
   return (
     <div>
-      <Navbar />
       <div className="clube-container">
         <header className="clube-header">
           <h1>{clubInfo.name}</h1>
