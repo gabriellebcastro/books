@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Navbar } from './Navbar';
 import './CadastrarLivro.css';
 import axios from 'axios'; // Importe o axios
 
@@ -64,7 +63,6 @@ export function CadastrarLivro() {
 
   return (
     <>
-      <Navbar />
       <div className="cadastrar-livro-container">
         <div className="form-wrapper">
           <h1>Cadastrar Novo Livro</h1>

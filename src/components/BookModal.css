@@ -1,72 +1,299 @@
-.modal-content {
-  background-color: white;
-  padding: 24px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 650px;
-  position: relative;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+/* Reset e Variáveis de Estilo */
+:root {
+  --primary-color: #007bff;
+  --primary-hover-color: #0056b3;
+  --danger-color: #dc3545;
+  --danger-hover-color: #c82333;
+  --secondary-color: #6c757d;
+  --secondary-hover-color: #5a6268;
+  --star-color: #ffc107;
+  --text-color: #343a40;
+  --light-text-color: #6c757d;
+  --border-color: #dee2e6;
+  --background-color: #fff;
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --modal-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --border-radius: 12px;
 }
 
-.close-button {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #555;
-  transition: 0.2s;
-}
-
-.close-button:hover {
-  color: #000;
-}
-
-.modal-body {
+/* Overlay do Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--overlay-bg);
   display: flex;
-  gap: 22px;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  backdrop-filter: blur(3px);
 }
 
-.modal-cover {
-  width: 170px;
-  height: auto;
-  border-radius: 6px;
+/* Conteúdo Principal do Modal */
+.modal-content {
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--modal-shadow);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-.modal-details {
-  flex: 1;
-}
-
-button {
-  padding: 10px 14px;
-  border-radius: 6px;
+/* Botão de Fechar */
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  width: 30px; /* Tamanho explícito */
+  height: 30px; /* Tamanho explícito */
+  background: transparent;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  line-height: 1;
+  padding: 0;
+  color: var(--light-text-color);
   cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
+  transition: color 0.2s ease;
+  z-index: 10; /* Garante que fique por cima */
 }
 
-.modal-footer button {
-  background-color: #007bff;
+.modal-close-btn:hover {
+  color: var(--text-color);
+}
+
+/* Corpo do Modal com Layout de 2 Colunas */
+.modal-body-redesigned {
+  display: flex;
+  width: 100%;
+  overflow-y: auto;
+  padding: 30px 35px;
+}
+
+/* Coluna da Esquerda (Capa) */
+.modal-left-column {
+  flex: 0 0 280px;
+  margin-right: 35px;
+  text-align: center;
+}
+
+.modal-book-cover-redesigned {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Coluna da Direita (Informações) */
+.modal-right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabeçalho (Título e Autor) */
+.modal-book-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 5px 0;
+  line-height: 1.2;
+}
+
+.modal-book-header h3 {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--light-text-color);
+  margin: 0 0 25px 0;
+}
+
+/* Informações Básicas (Gênero, Páginas, ISBN) */
+.modal-book-info {
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.modal-book-info p {
+  margin: 0 0 8px 0;
+  color: var(--text-color);
+}
+
+.modal-book-info strong {
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Sinopse */
+.modal-book-synopsis-redesigned {
+  margin-bottom: 25px;
+}
+
+.modal-book-synopsis-redesigned h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 8px 0;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+
+.modal-book-synopsis-redesigned p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--light-text-color);
+  margin: 0;
+  max-height: 120px; /* Limita a altura e adiciona scroll se necessário */
+  overflow-y: auto;
+  padding-right: 10px; /* Espaço para a barra de rolagem */
+}
+
+/* Seções Genéricas */
+.modal-section {
+  margin-bottom: 25px;
+}
+
+.modal-section h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0 0 12px 0;
+}
+
+/* Estrelas de Avaliação */
+.rating-stars-redesigned {
+  display: flex;
+  align-items: center;
+}
+
+.rating-stars-redesigned .star {
+  font-size: 2rem;
+  color: #e0e0e0;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.1s ease;
+  margin-right: 5px;
+}
+
+.rating-stars-redesigned .star:hover {
+  transform: scale(1.15);
+}
+
+.rating-stars-redesigned .star.filled {
+  color: var(--star-color);
+}
+
+/* Botões de Status */
+.status-update-redesigned {
+  display: flex;
+  gap: 10px;
+}
+
+.status-update-redesigned button {
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: 1px solid var(--border-color);
+  background-color: #f8f9fa;
+  color: var(--secondary-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.status-update-redesigned button:hover {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+}
+
+.status-update-redesigned button.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+/* Rodapé do Modal (Ações) */
+.modal-footer-redesigned {
+  margin-top: auto; /* Empurra para o final da coluna */
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal-footer-redesigned .btn-secondary,
+.modal-footer-redesigned .btn-danger {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.modal-footer-redesigned .btn-secondary {
+  background-color: #e9ecef;
+  color: var(--text-color);
+  border-color: #ced4da;
+}
+
+.modal-footer-redesigned .btn-secondary:hover {
+  background-color: #d8dde2;
+}
+
+.modal-footer-redesigned .btn-danger {
+  background-color: var(--danger-color);
   color: white;
 }
 
-.status-button {
-  background-color: #e5e5e5;
-  margin-right: 6px;
+.modal-footer-redesigned .btn-danger:hover {
+  background-color: var(--danger-hover-color);
 }
 
-.status-button:hover {
-  background-color: #d2d2d2;
-}
+/* Responsividade */
+@media (max-width: 768px) {
+  .modal-content {
+    max-height: 95vh;
+  }
+  
+  .modal-body-redesigned {
+    flex-direction: column;
+    padding: 25px;
+  }
 
-.status-emprestado {
-  background-color: #ffca28;
-}
+  .modal-left-column {
+    flex: 0 0 auto;
+    margin-right: 0;
+    margin-bottom: 25px;
+    max-width: 200px;
+    align-self: center;
+  }
 
-.remove-button {
-  background-color: #d9534f;
-  color: white;
+  .modal-book-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .modal-book-header h3 {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+
+  .modal-footer-redesigned {
+    flex-direction: column;
+  }
+
+  .modal-footer-redesigned button {
+    width: 100%;
+  }
 }

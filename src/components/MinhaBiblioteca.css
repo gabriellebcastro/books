@@ -178,7 +178,7 @@
 @media (min-width: 900px) {
   .clubes-grid {
     grid-template-columns: repeat(3, 1fr);
-  }
+}
 }
 
 @media (min-width: 1100px) {
@@ -188,7 +188,7 @@
 }
 
 .clube-card {
-  background: white;
+background: white;
   border: 1px solid #ddd;
   border-radius: 12px;
   overflow: hidden;
@@ -389,7 +389,8 @@
   background-color: #6c757d; /* Cinza */
 }
 
-/* Estilos do Modal */
+/* --- MODAL --- */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -401,198 +402,91 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 20px; /* evita corte em telas pequenas */
 }
 
 .modal-content {
   background: #fff;
   padding: 24px;
   border-radius: 12px;
-  max-width: 800px;
-  width: 90%;
+  max-width: 780px;
+  width: 100%;
+  max-height: 90vh;                 /* ← EVITA ESTOURAR TELA */
+  overflow-y: auto;                 /* ← SCROLL INTERNO DO MODAL */
   position: relative;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .modal-close {
   position: absolute;
-  top: 10px;
-  right: 15px;
+  top: 12px;
+  right: 16px;
   background: none;
   border: none;
   font-size: 28px;
   cursor: pointer;
-  color: #888;
+  color: #666;
+  transition: 0.2s;
+}
+
+.modal-close:hover {
+  color: black;
 }
 
 .modal-body {
   display: flex;
+  flex-wrap: wrap;            /* ← RESPONSIVO */
   gap: 24px;
 }
 
 .modal-book-cover {
-  width: 200px;
-  height: 300px;
+  width: 220px;
+  height: 320px;
   object-fit: cover;
   border-radius: 8px;
 }
 
 .modal-book-details {
   flex: 1;
-}
-
-.modal-book-details h2 {
-  margin-top: 0;
-  font-size: 28px;
-}
-
-.modal-book-details h3 {
-  font-size: 18px;
-  font-weight: normal;
-  color: #555;
-  margin-top: -8px;
-  margin-bottom: 16px;
-}
-
-.modal-book-details p {
-  font-size: 16px;
-  line-height: 1.6;
-}
-
-.modal-book-synopsis {
-  margin-top: 16px;
-}
-
-.modal-book-synopsis p:first-child {
-  margin-bottom: 8px;
+  min-width: 260px;
 }
 
 .modal-book-synopsis p:last-child {
   font-size: 14px;
   line-height: 1.5;
-  max-height: 100px; /* Limita a altura */
-  overflow-y: auto; /* Adiciona scroll se o texto for muito longo */
+  max-height: 180px;           /* aumenta visibilidade */
+  overflow-y: auto;
   text-align: justify;
   color: #333;
-  padding-right: 10px; /* Espaço para a barra de rolagem */
+  padding-right: 10px;
 }
 
-.modal-actions {
-  margin-top: 24px;
-  padding-top: 24px;
+/* MOBILE – mantém modal usável e sem corte */
+@media (max-width: 600px) {
+  .modal-content {
+    padding: 16px;
+    max-height: 95vh;
+  }
+
+  .modal-body {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .modal-book-cover {
+    width: 180px;
+    height: 260px;
+  }
+
+  .modal-book-details h2 {
+    font-size: 22px;
+  }
 }
 
-.status-update {
-  margin-bottom: 20px;
-}
-
-.status-update p {
-  margin: 0 0 10px;
-  font-weight: bold;
-}
-
-.status-update button {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: #f7f7f7;
-  cursor: pointer;
-  margin-right: 8px;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.status-update button:hover {
-  background: #e9e9e9;
-}
-
-.status-update button.active {
-  border-color: #007bff;
-  background: #007bff;
-  color: white;
-}
-
-.other-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.other-actions button {
-  padding: 10px 16px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #fff;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.other-actions button.remove-button {
-  background: #dc3545;
-  color: white;
-  border-color: #dc3545;
-}
-/* Reset e Variáveis Globais */
-:root {
-  --sidebar-width: 240px;
-  --primary-text: #1a1a1a;
-  --secondary-text: #666;
-  --border-color: #e0e0e0;
-  --background-color: #f9f9f9;
-  --white-color: #fff;
-  --accent-color: #007bff;
-  --shadow-color: rgba(0, 0, 0, 0.05);
-}
-
-/* Layout Principal */
-.biblioteca-container {
-  display: flex;
-  min-height: calc(100vh - 60px); /* 60px é a altura da navbar */
-}
-
-/* Barra Lateral */
-.biblioteca-sidebar {
-  width: var(--sidebar-width);
-  position: fixed;
-  top: 60px; /* Altura da navbar */
-  left: 0;
-  bottom: 0;
-  background-color: var(--white-color);
-  border-right: 1px solid var(--border-color);
-  padding: 2rem 0;
-}
-
-.biblioteca-sidebar nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.biblioteca-sidebar nav li {
-  padding: 0.9rem 1.5rem;
-  cursor: pointer;
-  font-size: 1rem;
-  color: var(--secondary-text);
-  font-weight: 500;
-  border-left: 3px solid transparent;
-  transition: all 0.2s ease-in-out;
-}
-
-.biblioteca-sidebar nav li:hover {
-  background-color: var(--background-color);
-  color: var(--primary-text);
-}
-
-.biblioteca-sidebar nav li.active {
-  color: var(--primary-text);
-  font-weight: 600;
-  border-left-color: var(--accent-color);
-}
-
-/* Conteúdo Principal */
+/* Layout Principal e Conteúdo da Biblioteca */
 .biblioteca-main-content {
-  margin-left: var(--sidebar-width);
-  width: calc(100% - var(--sidebar-width));
-  padding: 2rem 3rem;
+  padding: 6rem 3rem 2rem; /* Aumentado o padding superior */
   background-color: var(--background-color);
-  padding-top: 120px;
 }
 
 .biblioteca-hero h1 {

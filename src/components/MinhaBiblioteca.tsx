@@ -290,23 +290,35 @@ export function MinhaBibliotecaPage() {
           {selectedBook && (
             <div className="modal-overlay" onClick={handleCloseModal}>
               <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close" onClick={handleCloseModal}>&times;</button>
-                <div className="modal-body">
-                  <img src={selectedBook.book.cover} alt={selectedBook.book.title} className="modal-book-cover" />
-                  <div className="modal-book-details">
-                    <h2>{selectedBook.book.title}</h2>
-                    <h3>{selectedBook.book.author}</h3>
-                    <p><strong>Gênero:</strong> {selectedBook.book.genre}</p>
-                    <p><strong>Páginas:</strong> {selectedBook.book.pages}</p>
-                    <p><strong>ISBN:</strong> {selectedBook.book.isbn}</p>
-                    <div className="modal-book-synopsis">
-                      <p><strong>Sinopse:</strong></p>
+                <button className="modal-close-btn" onClick={handleCloseModal}>&times;</button>
+                
+                <div className="modal-body-redesigned">
+                  {/* Coluna da Esquerda: Capa do Livro */}
+                  <div className="modal-left-column">
+                    <img src={selectedBook.book.cover} alt={selectedBook.book.title} className="modal-book-cover-redesigned" />
+                  </div>
+
+                  {/* Coluna da Direita: Detalhes e Ações */}
+                  <div className="modal-right-column">
+                    <div className="modal-book-header">
+                      <h2>{selectedBook.book.title}</h2>
+                      <h3>por {selectedBook.book.author}</h3>
+                    </div>
+
+                    <div className="modal-book-info">
+                      <p><strong>Gênero:</strong> {selectedBook.book.genre}</p>
+                      <p><strong>Páginas:</strong> {selectedBook.book.pages}</p>
+                      <p><strong>ISBN:</strong> {selectedBook.book.isbn}</p>
+                    </div>
+
+                    <div className="modal-book-synopsis-redesigned">
+                      <h4>Sinopse</h4>
                       <p>{selectedBook.book.synopsis}</p>
                     </div>
                     
-                    <div className="rating-container">
-                      <p><strong>Sua Avaliação:</strong></p>
-                      <div className="stars">
+                    <div className="modal-section">
+                      <h4>Sua Avaliação</h4>
+                      <div className="rating-stars-redesigned">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span
                             key={star}
@@ -324,21 +336,22 @@ export function MinhaBibliotecaPage() {
                       </div>
                     </div>
 
-                    <div className="modal-actions">
-                      <div className="status-update">
-                        <p><strong>Mudar status:</strong></p>
+                    <div className="modal-section">
+                      <h4>Status da Leitura</h4>
+                      <div className="status-update-redesigned">
                         <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'quero ler' })} className={selectedBook.status === 'quero ler' ? 'active' : ''}>Quero Ler</button>
                         <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'lendo' })} className={selectedBook.status === 'lendo' ? 'active' : ''}>Lendo</button>
                         <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { status: 'lido' })} className={selectedBook.status === 'lido' ? 'active' : ''}>Lido</button>
                       </div>
-                      <div className="other-actions">
-                        <button onClick={() => handleUpdateBookDetails(selectedBook.book._id, { favorite: !selectedBook.favorite })}>
-                          {selectedBook.favorite ? 'Desfavoritar' : 'Favoritar'}
-                        </button>
-                        <button className="remove-button" onClick={() => { handleRemoveBook(selectedBook.book._id); handleCloseModal(); }}>
-                          Remover da Estante
-                        </button>
-                      </div>
+                    </div>
+
+                    <div className="modal-footer-redesigned">
+                      <button className="btn-secondary" onClick={() => handleUpdateBookDetails(selectedBook.book._id, { favorite: !selectedBook.favorite })}>
+                        {selectedBook.favorite ? '★ Desfavoritar' : '☆ Favoritar'}
+                      </button>
+                      <button className="btn-danger" onClick={() => { handleRemoveBook(selectedBook.book._id); handleCloseModal(); }}>
+                        Remover da Estante
+                      </button>
                     </div>
                   </div>
                 </div>
