@@ -2,6 +2,7 @@ import express from 'express';
 import {
   criarClube,
   getClubes,
+  getMeusClubes,
   getClubeById,
   entrarNoClube,
   aprovarEntrada,
@@ -25,5 +26,6 @@ router.route('/:id')
 router.post('/:id/entrar', protect, entrarNoClube);
 router.post('/:id/aprovar/:userId', protect, aprovarEntrada);
 router.post('/:id/promover/:userId', protect, promoverAdmin);
+router.route('/meus-clubes').get(protect, getMeusClubes);
 
 export default router;

@@ -181,3 +181,18 @@ export const promoverAdmin = async (req, res) => {
     res.status(500).json({ message: 'Erro ao promover membro' });
   }
 };
+
+export const getMeusClubes = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const clubes = await Club.find({
+      $or: [
+        { membros: userId },
+        { administradores: userId }
+      ]
+    }).populate('administradores', 'name username').populate('membros', 'name username');
+    res.json(clubes);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar seus clubes' });
+  }
+};
