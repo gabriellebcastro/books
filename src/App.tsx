@@ -35,7 +35,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/biblioteca/:filter?" element={<MinhaBibliotecaPage />} />
         <Route path="/cadastrar-livro" element={<CadastrarLivro />} />
-        <Route path="/clube-do-livro" element={<ClubeDoLivro />} />
+        <Route path="/clubes/:id" element={<ClubeDoLivro />} />
         <Route path="/clubes" element={<Clubes />} />
         <Route path="/create-club" element={<CreateClub />} />
         

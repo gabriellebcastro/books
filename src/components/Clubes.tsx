@@ -1,107 +1,174 @@
+import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import './Clubes.css';
 
+interface Clube {
+    _id: string;
+    nome: string;
+    capa: string;
+    descricao: string;
+    membros: any[];
+}
+
 export function Clubes() {
+    const [clubes, setClubes] = useState<Clube[]>([]);
+    const [termoBusca, setTermoBusca] = useState('');
+
+    useEffect(() => {
+        const fetchClubes = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/clubes');
+                if (response.ok) {
+                    const data = await response.json();
+                    setClubes(data);
+                } else {
+                    console.error('Erro ao buscar clubes:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar clubes:', error);
+            }
+        };
+        fetchClubes();
+    }, []);
+
+    const clubesAleatorios = useMemo(() => {
+        return [...clubes].sort(() => 0.5 - Math.random()).slice(0, 3);
+    }, [clubes]);
+
+    const clubesFiltrados = useMemo(() => {
+        return clubes.filter(clube =>
+            clube.nome.toLowerCase().includes(termoBusca.toLowerCase())
+        );
+    }, [termoBusca, clubes]);
+
+    const clubesParaExibir = termoBusca ? clubesFiltrados : clubesAleatorios;
+
     return (
-        <div>
-            <div className="page-container">
-                {/* Esta div envolve todo o conteúdo central */}
-                <main className="main-content">
-                    
-                    {/* =================================== */}
-                    {/* Seção Meus Clubes */}
-                    {/* =================================== */}
-                    <section className="section-container">
-                        <h2 className="section-title">Meus Clubes</h2>
-                        <div className="clubs-grid">
-                            {/* Card de Clube (Exemplo 1) */}
-                            {/* DADOS DINÂMICOS: Repetir este bloco para cada clube do usuário */}
-                            <div className="club-card">
-                                <img src="https://via.placeholder.com/400x200/E0E0E0/808080?text=Clube+Aventura" alt="Imagem do Clube" className="club-card-img" />
+        <div className="page-container">
+            <main className="main-content">
+
+                {/* HEADER PADRONIZADO */}
+                <header className="clubes-header">
+                    <h1>Clubes do Livro</h1>
+                    <p>
+                        Conecte-se com outros leitores, participe de discussões e descubra novas aventuras literárias.
+                    </p>
+                </header>
+
+                {/* EXPLORAR CLUBES */}
+                <section className="section-container">
+                    <h2 className="section-title">Explore Clubes</h2>
+
+                    <div className="filtros-container">
+                        <div className="search-bar">
+                            <input
+                                type="text"
+                                placeholder="Pesquisar clubes por nome..."
+                                value={termoBusca}
+                                onChange={(e) => setTermoBusca(e.target.value)}
+                            />
+                            <button className="search-icon" type="button">🔍</button>
+                        </div>
+                    </div>
+
+                    {/* GRID DE CLUBES */}
+                    <div className="clubs-grid">
+                        {clubesParaExibir.map(clube => (
+                            <div key={clube._id} className="club-card">
+                                <img
+                                    src={`http://localhost:5000${clube.capa.replace(/\\/g, '/')}`}
+                                    alt={clube.nome}
+                                    className="club-card-img"
+                                />
+
                                 <div className="club-card-body">
-                                    <h3 className="club-card-title">Clube Aventura Literária</h3>
-                                    <p className="club-card-description">Explorando mundos fantásticos e heróis inesquecíveis.</p>
+                                    <h3 className="club-card-title">{clube.nome}</h3>
+                                    <p className="club-card-description">{clube.descricao}</p>
+
                                     <div className="club-card-footer">
-                                        <span className="club-card-members">128 membros</span>
-                                        <a href="#" className="btn btn-primary">Ver Clube</a>
+                                        <span className="club-card-members">
+                                            {(clube.membros || []).length} membros
+                                        </span>
+
+                                        <Link to={`/clubes/${clube._id}`} className="btn btn-secondary">
+                                            Ver Mais
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
-                            {/* Fim do Card de Clube */}
+                        ))}
 
-                            {/* Card de Clube (Exemplo 2) */}
-                            <div className="club-card">
-                                <img src="https://via.placeholder.com/400x200/D0D0D0/808080?text=Clube+Suspense" alt="Imagem do Clube" className="club-card-img" />
-                                <div className="club-card-body">
-                                    <h3 className="club-card-title">Mestres do Suspense</h3>
-                                    <p className="club-card-description">Para quem não dispensa uma boa dose de mistério e tensão.</p>
-                                    <div className="club-card-footer">
-                                        <span className="club-card-members">75 membros</span>
-                                        <a href="#" className="btn btn-primary">Ver Clube</a>
-                                    </div>
-                                </div>
-                            </div>
+                        {/* CARD DE CRIAR CLUBE */}
+                        <div className="club-card create-club-card">
+                            <Link to="/create-club" className="create-club-link">
+                                <span className="create-club-icon">+</span>
+                                <span className="create-club-text">Criar Novo Clube</span>
+                            </Link>
+                        </div>
+                    </div>
+                </section>
 
-                            {/* Card para Criar um Novo Clube */}
-                            <div className="club-card create-club-card">
-                                <a href="#" className="create-club-link">
-                                    <div className="create-club-icon">+</div>
-                                    <span className="create-club-text">Criar Novo Clube</span>
-                                </a>
+                {/* CLUBE DO MÊS */}
+                <section className="section-container">
+                    <h2 className="section-title">Clube do Mês</h2>
+
+                    <div className="featured-club-card">
+                        <div className="featured-badge">Destaque</div>
+
+                        <img
+                            src="/path/to/clube-mes-image.jpg"
+                            alt="Clube do Mês"
+                            className="featured-club-img"
+                        />
+
+                        <div className="featured-club-body">
+                            <h3 className="featured-club-title">A Sociedade dos Leitores Noturnos</h3>
+                            <p className="featured-club-author">Livro do mês: "O Conto da Aia"</p>
+                            <p>
+                                Este mês, estamos lendo "O Conto da Aia" de Margaret Atwood.
+                                Junte-se a nós para uma discussão profunda sobre temas de poder, gênero e resistência.
+                            </p>
+
+                            <Link
+                                to="/clubes/sociedade-leitores-noturnos"
+                                className="btn btn-primary"
+                            >
+                                Saiba Mais
+                            </Link>
+                        </div>
+                    </div>
+                </section>
+
+                {/* EVENTOS */}
+                <section className="section-container">
+                    <h2 className="section-title">Próximos Eventos</h2>
+
+                    <div className="events-grid">
+                        <div className="event-card">
+                            <h3 className="event-card-title">Discussão de "Duna"</h3>
+                            <p className="event-card-date">25 de Julho de 2024</p>
+                            <p className="event-card-description">
+                                Prepare-se para uma jornada épica por Arrakis. Traga suas anotações e teorias!
+                            </p>
+                            <div className="event-card-footer">
+                                <span className="btn-secondary">Viajantes da Ficção Científica</span>
                             </div>
                         </div>
-                    </section>
 
-                    {/* =================================== */}
-                    {/* Seção Clube do Mês */}
-                    {/* =================================== */}
-                    <section className="section-container">
-                        <h2 className="section-title">Clube do Mês</h2>
-                        {/* DADOS DINÂMICOS: Substituir as informações do clube em destaque */}
-                        <div className="featured-club-card">
-                            <div className="featured-badge">Destaque</div>
-                            <img src="https://via.placeholder.com/150x220/C0C0C0/808080?text=Livro+Destaque" alt="Capa do Livro" className="featured-club-img" />
-                            <div className="featured-club-body">
-                                <h3 className="featured-club-title">Clássicos Atemporais</h3>
-                                <p className="featured-club-author">Leitura atual: "Orgulho e Preconceito" de Jane Austen</p>
-                                <p className="featured-club-description">
-                                    Um clube dedicado a revisitar as obras que moldaram a literatura mundial. Ideal para quem busca discussões profundas e uma nova apreciação pelos clássicos.
-                                </p>
+                        <div className="event-card">
+                            <h3 className="event-card-title">Encontro de Poesia</h3>
+                            <p className="event-card-date">02 de Agosto de 2024</p>
+                            <p className="event-card-description">
+                                Uma noite para compartilhar seus poemas favoritos ou originais.
+                            </p>
+                            <div className="event-card-footer">
+                                <span className="btn-secondary">Versos e Vinhos</span>
                             </div>
                         </div>
-                    </section>
+                    </div>
+                </section>
 
-                    {/* =================================== */}
-                    {/* Seção Eventos e Encontros */}
-                    {/* =================================== */}
-                    <section className="section-container">
-                        <h2 className="section-title">Próximos Eventos e Encontros</h2>
-                        <div className="events-grid">
-                            {/* Card de Evento (Exemplo 1) */}
-                            {/* DADOS DINÂMICOS: Repetir este bloco para cada evento */}
-                            <div className="event-card">
-                                <h3 className="event-card-title">Debate sobre "Duna"</h3>
-                                <p className="event-card-date">28 de Agosto de 2024 - 19:30</p>
-                                <p className="event-card-description">Análise sobre as adaptações e o impacto cultural da obra de Frank Herbert.</p>
-                                <div className="event-card-footer">
-                                    <a href="#" className="btn btn-secondary">Ver Detalhes</a>
-                                </div>
-                            </div>
-                            {/* Fim do Card de Evento */}
-
-                            {/* Card de Evento (Exemplo 2) */}
-                            <div className="event-card">
-                                <h3 className="event-card-title">Encontro Virtual: Poesia Moderna</h3>
-                                <p className="event-card-date">05 de Setembro de 2024 - 20:00</p>
-                                <p className="event-card-description">Leitura e discussão de poemas contemporâneos. Traga seus favoritos!</p>
-                                <div className="event-card-footer">
-                                    <a href="#" className="btn btn-secondary">Ver Detalhes</a>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                </main>
-            </div>
+            </main>
         </div>
     );
 }
