@@ -23,7 +23,6 @@ export const criarClube = async (req, res) => {
 
     const clubeCriado = await novoClube.save();
 
-    // Adicionar o clube ao perfil do usuário que o criou
     const user = await User.findById(req.user._id);
     user.clubes.push(clubeCriado._id);
     await user.save();
@@ -77,22 +76,31 @@ export const entrarNoClube = async (req, res) => {
       return res.status(404).json({ message: 'Clube não encontrado' });
     }
 
-    if (clube.membros.includes(req.user._id) || clube.administradores.includes(req.user._id)) {
+    const userId = req.user._id.toString();
+
+    const isMember = clube.membros.some(id => id.toString() === userId);
+    const isAdmin = clube.administradores.some(id => id.toString() === userId);
+    const isPending = clube.pendentes.some(id => id.toString() === userId);
+
+    if (isMember || isAdmin) {
       return res.status(400).json({ message: 'Você já faz parte deste clube' });
     }
 
     if (clube.tipo === 'Público') {
-      clube.membros.push(req.user._id);
+      clube.membros.push(userId);
       await clube.save();
-      res.json({ message: 'Você entrou no clube com sucesso!' });
-    } else { // Privado
-      if (clube.pendentes.includes(req.user._id)) {
-        return res.status(400).json({ message: 'Você já solicitou a entrada neste clube' });
-      }
-      clube.pendentes.push(req.user._id);
-      await clube.save();
-      res.json({ message: 'Sua solicitação para entrar no clube foi enviada' });
+      return res.json({ message: 'Você entrou no clube com sucesso!' });
     }
+
+    if (isPending) {
+      return res.status(400).json({ message: 'Você já solicitou a entrada neste clube' });
+    }
+
+    clube.pendentes.push(userId);
+    await clube.save();
+
+    res.json({ message: 'Sua solicitação para entrar no clube foi enviada' });
+
   } catch (error) {
     res.status(500).json({ message: 'Erro ao processar a solicitação' });
   }
@@ -109,19 +117,28 @@ export const aprovarEntrada = async (req, res) => {
       return res.status(404).json({ message: 'Clube não encontrado' });
     }
 
-    if (!clube.administradores.includes(req.user._id)) {
+    const adminId = req.user._id.toString();
+    const userId = req.params.userId.toString();
+
+    const isAdmin = clube.administradores.some(id => id.toString() === adminId);
+
+    if (!isAdmin) {
       return res.status(403).json({ message: 'Ação não autorizada' });
     }
 
-    const userId = req.params.userId;
-    if (clube.pendentes.includes(userId)) {
-      clube.pendentes = clube.pendentes.filter(id => id.toString() !== userId);
-      clube.membros.push(userId);
-      await clube.save();
-      res.json({ message: 'Usuário aprovado com sucesso!' });
-    } else {
-      res.status(400).json({ message: 'Usuário não está na lista de pendentes' });
+    const isPending = clube.pendentes.some(id => id.toString() === userId);
+
+    if (!isPending) {
+      return res.status(400).json({ message: 'Usuário não está na lista de pendentes' });
     }
+
+    clube.pendentes = clube.pendentes.filter(id => id.toString() !== userId);
+    clube.membros.push(userId);
+
+    await clube.save();
+
+    res.json({ message: 'Usuário aprovado com sucesso!' });
+
   } catch (error) {
     res.status(500).json({ message: 'Erro ao aprovar o usuário' });
   }
@@ -131,27 +148,36 @@ export const aprovarEntrada = async (req, res) => {
 // @route   POST /api/clubes/:id/promover/:userId
 // @access  Private (Admin)
 export const promoverAdmin = async (req, res) => {
-    try {
-        const clube = await Club.findById(req.params.id);
+  try {
+    const clube = await Club.findById(req.params.id);
 
-        if (!clube) {
-            return res.status(404).json({ message: 'Clube não encontrado' });
-        }
-
-        if (!clube.administradores.includes(req.user._id)) {
-            return res.status(403).json({ message: 'Ação não autorizada' });
-        }
-
-        const userId = req.params.userId;
-        if (clube.membros.includes(userId)) {
-            clube.membros = clube.membros.filter(id => id.toString() !== userId);
-            clube.administradores.push(userId);
-            await clube.save();
-            res.json({ message: 'Membro promovido a administrador com sucesso!' });
-        } else {
-            res.status(400).json({ message: 'Usuário não é membro deste clube' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Erro ao promover membro' });
+    if (!clube) {
+      return res.status(404).json({ message: 'Clube não encontrado' });
     }
+
+    const adminId = req.user._id.toString();
+    const userId = req.params.userId.toString();
+
+    const isAdmin = clube.administradores.some(id => id.toString() === adminId);
+
+    if (!isAdmin) {
+      return res.status(403).json({ message: 'Ação não autorizada' });
+    }
+
+    const isMember = clube.membros.some(id => id.toString() === userId);
+
+    if (!isMember) {
+      return res.status(400).json({ message: 'Usuário não é membro deste clube' });
+    }
+
+    clube.membros = clube.membros.filter(id => id.toString() !== userId);
+    clube.administradores.push(userId);
+
+    await clube.save();
+
+    res.json({ message: 'Membro promovido a administrador com sucesso!' });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao promover membro' });
+  }
 };

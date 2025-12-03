@@ -1,164 +1,142 @@
-/* Estilos gerais para a página do clube do livro */
+/* CONTAINER PRINCIPAL — alinhado com as outras páginas do sistema */
 .clube-container {
-  padding: 2rem;
-  background-color: #f9f9f9;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  background: transparent; /* remove fundo branco */
   font-family: 'Inter', sans-serif;
 }
 
+/* ----- CARDS ------ */
 .card {
   background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Cabeçalho */
-.clube-header {
-  text-align: center;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+  padding: 1.8rem;
   margin-bottom: 2rem;
+  border: 1px solid #eee;
 }
 
-.clube-header h1 {
-  font-size: 2.5rem;
+/* ----- HEADER DO CLUBE ----- */
+.clube-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+  text-align: left;
+}
+
+.clube-cover-image {
+  width: 170px;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.clube-header-info h1 {
+  font-size: 2.3rem;
   font-weight: 700;
-  color: #333;
+  color: #222;
 }
 
-.clube-header p {
+.clube-header-info p {
   font-size: 1.1rem;
-  color: #666;
-  max-width: 600px;
-  margin: 0.5rem auto 1.5rem;
+  color: #555;
+  margin: 0.5rem 0 1rem;
+  max-width: 500px;
 }
 
+/* TAGS */
+.tags {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: #f1f3f5;
+  color: #333;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  border: 1px solid #e4e4e4;
+}
+
+/* BOTÃO — igual ao estilo da Minha Biblioteca */
 .clube-join-btn {
-  background-color: #007bff;
+  align-self: flex-start;
+  margin-left: auto;
+  background-color: #6366f1;
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
+  padding: 12px 22px;
+  border-radius: 10px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: 0.25s;
 }
 
 .clube-join-btn:hover {
-  background-color: #0056b3;
+  background-color: #4f46e5;
 }
 
-/* Layout principal */
+/* ------ LAYOUT PRINCIPAL ------ */
 .clube-main-content {
+  margin-top: 2.5rem;
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 3fr 1.5fr;
+  gap: 2rem;
 }
 
-.clube-left-column {
-  display: flex;
-  flex-direction: column;
-}
-
-.clube-right-column {
-  display: flex;
-  flex-direction: column;
-}
-
+/* TÍTULOS DAS SEÇÕES */
 .clube-section h2 {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #333;
   margin-bottom: 1rem;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
+  color: #222;
 }
 
-/* Leitura do Mês */
+/* ----- LEITURA DO MÊS ----- */
 .leitura-mes {
   display: flex;
   gap: 1.5rem;
 }
 
 .leitura-mes-cover {
-  width: 150px;
-  height: auto;
+  width: 120px;
+  height: 180px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 10px;
 }
 
 .leitura-mes-details h3 {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 600;
 }
 
 .leitura-mes-details .author {
-  color: #555;
-  margin-bottom: 0.5rem;
+  color: #777;
+  margin-top: 0.3rem;
 }
 
-.clube-action-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
-/* Próximos Encontros */
+/* ----- ENCONTROS ----- */
 .encontros-list {
   list-style: none;
   padding: 0;
 }
 
 .encontro-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 0.75rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 0.95rem;
 }
 
 .encontro-item:last-child {
   border-bottom: none;
 }
 
-.clube-details-btn {
-  background: none;
-  border: 1px solid #ccc;
-  color: #333;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* Informações do Clube */
-.info-clube p {
-  margin-bottom: 0.5rem;
-}
-
-.tags-container {
-  margin-top: 1rem;
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.tag {
-  background-color: #e9ecef;
-  color: #495057;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-/* Membros */
+/* ----- MEMBROS ----- */
 .members-list {
   list-style: none;
   padding: 0;
@@ -168,12 +146,17 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.member-item:last-child {
+  border-bottom: none;
 }
 
 .member-avatar {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -183,62 +166,53 @@
 }
 
 .member-role {
-  color: #777;
-  font-size: 0.9rem;
-}
-
-/* Seções do Moderador */
-.clube-add-btn {
-  width: 100%;
-  padding: 10px;
-  background-color: #f0f0f0;
-  border: 1px dashed #ccc;
-  color: #555;
-  cursor: pointer;
-  margin-top: 1rem;
+  background: #e5e7eb;
+  padding: 4px 8px;
   border-radius: 6px;
+  font-size: 0.75rem;
+  color: #444;
 }
 
-.solicitacoes-list {
-  list-style: none;
-  padding: 0;
-}
-
+/* ----- MODERAÇÃO ----- */
 .solicitacao-item {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.member-avatar-small {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 1rem;
+  align-items: center;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #eee;
 }
 
 .solicitacao-actions button {
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
   border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
   cursor: pointer;
-  margin-left: 0.5rem;
 }
 
 .clube-accept-btn {
-  background-color: #28a745;
+  background: #4caf50;
   color: white;
 }
 
 .clube-reject-btn {
-  background-color: #dc3545;
+  background: #e63946;
   color: white;
 }
 
-/* Responsividade */
-@media (max-width: 768px) {
+/* ----- RESPONSIVIDADE ----- */
+@media (max-width: 900px) {
+  .clube-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .clube-join-btn {
+    margin: 1rem 0 0 0;
+  }
+
   .clube-main-content {
     grid-template-columns: 1fr;
   }
@@ -246,6 +220,17 @@
   .leitura-mes {
     flex-direction: column;
     align-items: center;
-    text-align: center;
   }
 }
+
+.clube-member-btn {
+  background-color: #e4e4e4;
+  color: #333;
+  cursor: default;
+  border: none;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+

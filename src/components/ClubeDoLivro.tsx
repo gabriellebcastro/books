@@ -1,12 +1,12 @@
+// ClubeDoLivro.tsx
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import "./ClubeDoLivro.css";
 
-// Interfaces para tipagem dos dados
 interface Member {
   _id: string;
   name: string;
-  username: string;
+  username?: string;
 }
 
 interface Club {
@@ -15,83 +15,102 @@ interface Club {
   descricao: string;
   capa: string;
   genero: string[];
-  membros: Member[];
-  administradores: Member[];
+  membros: Array<Member | string>;
+  administradores: Array<Member | string>;
+  tipo?: string;
+  pendentes?: Array<string>;
 }
 
-// Componente placeholder para a imagem do livro e avatares
 const placeholderAvatar = "https://via.placeholder.com/150";
 
 export function ClubeDoLivro() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [clubInfo, setClubInfo] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-  // Simulação de ID do usuário logado
-  const currentUserId = "6685d9457c477f225282b54a"; // Substitua pelo ID real do usuário logado
+  // TODO: substituir por ID real do usuário (ex: pegar do token / contexto)
+  const currentUserId = localStorage.getItem("userId") || "6685d9457c477f225282b54a";
 
   useEffect(() => {
     const fetchClubInfo = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await fetch(`http://localhost:5000/api/clubes/${id}`);
-        if (!response.ok) {
-          throw new Error("Clube não encontrado");
-        }
-        const data = await response.json();
+        const res = await fetch(`http://localhost:5000/api/clubes/${id}`);
+        if (!res.ok) throw new Error("Clube não encontrado");
+        const data = await res.json();
         setClubInfo(data);
       } catch (err) {
-        if (err instanceof Error) {
-            setError(err.message);
-        } else {
-            setError("Ocorreu um erro desconhecido");
-        }
+        setError(err instanceof Error ? err.message : "Erro desconhecido");
       } finally {
         setLoading(false);
       }
     };
-
-    fetchClubInfo();
+    if (id) fetchClubInfo();
   }, [id]);
 
-  if (loading) {
-    return <div>Carregando...</div>;
-  }
+  if (loading) return <div>Carregando...</div>;
+  if (error) return <div>Erro: {error}</div>;
+  if (!clubInfo) return <div>Clube não encontrado.</div>;
 
-  if (error) {
-    return <div>Erro: {error}</div>;
-  }
+  // helper para extrair id string (suporta array de strings ou objetos populados)
+  const idOf = (item: Member | string) => (typeof item === "string" ? item : item._id);
 
-  if (!clubInfo) {
-    return <div>Clube não encontrado.</div>;
-  }
+  const isMember = (clubInfo.membros || []).some((m) => idOf(m) === String(currentUserId))
+    || (clubInfo.administradores || []).some((a) => idOf(a) === String(currentUserId));
 
-  // Verifica se o usuário atual é membro ou administrador
-  const isMember =
-    clubInfo.membros.some((member) => member._id === currentUserId) ||
-    clubInfo.administradores.some((admin) => admin._id === currentUserId);
+  const isModerator = (clubInfo.administradores || []).some((a) => idOf(a) === String(currentUserId));
 
-  // Verifica se o usuário atual é moderador (administrador)
-  const isModerator = clubInfo.administradores.some(
-    (admin) => admin._id === currentUserId
-  );
+  const handleJoin = async () => {
+    setActionLoading(true);
+    setMessage(null);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setMessage("Você precisa estar logado para entrar no clube.");
+        setActionLoading(false);
+        return;
+      }
 
-  // Dados placeholder para Leitura do Mês e Próximos Encontros
-  const leituraDoMes = {
-    titulo: "A Sociedade do Anel",
-    autor: "J.R.R. Tolkien",
-    capa: "https://via.placeholder.com/100x150",
+      const res = await fetch(`http://localhost:5000/api/clubes/${id}/entrar`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.message || "Erro ao tentar entrar no clube.");
+        setActionLoading(false);
+        return;
+      }
+
+      // resposta OK: se clube é público, atualizamos membros na UI para refletir entrada imediata
+      if (clubInfo.tipo && clubInfo.tipo.toLowerCase() === "público" || clubInfo.tipo?.toLowerCase() === "publico") {
+        setClubInfo(prev => {
+          if (!prev) return prev;
+          const novosMembros = [...(prev.membros || []), String(currentUserId)];
+          return { ...prev, membros: novosMembros };
+        });
+        setMessage(data.message || "Você entrou no clube com sucesso!");
+      } else {
+        // privado: provavelmente resposta diz que solicitação foi enviada
+        setMessage(data.message || "Solicitação enviada. Aguarde aprovação.");
+        // opcional: adicionar ao pendentes no estado (se quiser)
+        setClubInfo(prev => prev ? { ...prev, pendentes: [...(prev.pendentes || []), String(currentUserId)] } : prev);
+      }
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Erro desconhecido");
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+    }
   };
-
-  const proximosEncontros = [
-    { data: "25/07", horario: "19:00", local: "Online (Discord)" },
-    { data: "08/08", horario: "19:00", local: "Online (Discord)" },
-  ];
-
-  const pendingRequests = [
-    { id: 1, name: "Carlos" },
-    { id: 2, name: "Mariana" },
-  ];
 
   return (
     <div className="clube-container">
@@ -110,20 +129,35 @@ export function ClubeDoLivro() {
             ))}
           </div>
         </div>
-        {!isMember && (
-          <button className="clube-join-btn">Entrar no Clube</button>
+
+        {/* Botão: Entrar / Já sou membro */}
+        {!isMember ? (
+          <button
+            className="clube-join-btn"
+            onClick={handleJoin}
+            disabled={actionLoading}
+            title={actionLoading ? "Aguarde..." : "Entrar no clube"}
+          >
+            {actionLoading ? "Processando..." : "Entrar no Clube"}
+          </button>
+        ) : (
+          <button className="clube-member-btn" disabled>
+            Você já é membro
+          </button>
         )}
       </header>
+
+      {message && <div style={{ textAlign: "center", marginBottom: 12, color: "#333" }}>{message}</div>}
 
       <main className="clube-main-content">
         <div className="clube-left-column">
           <section className="clube-section card">
             <h2>Leitura do Mês</h2>
             <div className="leitura-mes">
-              <img src={leituraDoMes.capa} alt={leituraDoMes.titulo} className="leitura-mes-cover" />
+              <img src={"https://via.placeholder.com/100x150"} alt="Leitura do Mês" className="leitura-mes-cover" />
               <div className="leitura-mes-details">
-                <h3>{leituraDoMes.titulo}</h3>
-                <p className="author">{leituraDoMes.autor}</p>
+                <h3>A Sociedade do Anel</h3>
+                <p className="author">J.R.R. Tolkien</p>
               </div>
             </div>
           </section>
@@ -131,11 +165,8 @@ export function ClubeDoLivro() {
           <section className="clube-section card">
             <h2>Próximos Encontros</h2>
             <ul className="encontros-list">
-              {proximosEncontros.map((encontro, index) => (
-                <li key={index} className="encontro-item">
-                  <span>{encontro.data} às {encontro.horario} - {encontro.local}</span>
-                </li>
-              ))}
+              <li className="encontro-item"><span>25/07 às 19:00 - Online (Discord)</span></li>
+              <li className="encontro-item"><span>08/08 às 19:00 - Online (Discord)</span></li>
             </ul>
           </section>
         </div>
@@ -143,26 +174,20 @@ export function ClubeDoLivro() {
         <div className="clube-right-column">
           <section className="clube-section card info-clube">
             <h2>Informações do Clube</h2>
-            <p>
-              <strong>Membros:</strong> {clubInfo.membros?.length || 0}
-            </p>
+            <p><strong>Membros:</strong> {clubInfo.membros?.length || 0}</p>
           </section>
 
           <section className="clube-section card">
             <h2>Membros</h2>
             <div className="members-list">
               {clubInfo.membros && clubInfo.membros.map((member) => {
-                const isAdmin = clubInfo.administradores.some(
-                  (admin) => admin._id === member._id
-                );
+                const mid = typeof member === "string" ? member : member._id;
+                const name = typeof member === "string" ? member : member.name;
+                const isAdmin = (clubInfo.administradores || []).some(a => (typeof a === "string" ? a : a._id) === mid);
                 return (
-                  <div key={member._id} className="member-item">
-                    <img
-                      src={placeholderAvatar}
-                      alt={member.name}
-                      className="member-avatar"
-                    />
-                    <span className="member-name">{member.name}</span>
+                  <div key={mid} className="member-item">
+                    <img src={placeholderAvatar} alt={String(name)} className="member-avatar" />
+                    <span className="member-name">{name}</span>
                     {isAdmin && <span className="member-role">Admin</span>}
                   </div>
                 );
@@ -175,15 +200,13 @@ export function ClubeDoLivro() {
               <section className="clube-section card">
                 <h2>Solicitações Pendentes</h2>
                 <ul className="solicitacoes-list">
-                  {pendingRequests.map((request) => (
-                    <li key={request.id} className="solicitacao-item">
-                      <span>{request.name}</span>
-                      <div className="solicitacao-actions">
-                        <button className="clube-accept-btn">Aprovar</button>
-                        <button className="clube-reject-btn">Rejeitar</button>
-                      </div>
-                    </li>
-                  ))}
+                  <li className="solicitacao-item">
+                    <span>Carlos</span>
+                    <div className="solicitacao-actions">
+                      <button className="clube-accept-btn">Aprovar</button>
+                      <button className="clube-reject-btn">Rejeitar</button>
+                    </div>
+                  </li>
                 </ul>
               </section>
 
