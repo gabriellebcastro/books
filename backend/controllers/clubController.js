@@ -155,6 +155,8 @@ export const entrarNoClube = asyncHandler(async (req, res) => {
 
   if (clube.tipo === 'Público') {
     clube.membros.push(userId);
+    // Adiciona o clube à lista de clubes do usuário
+    await User.findByIdAndUpdate(userId, { $push: { clubes: clube._id } });
     await clube.save();
     res.json({ message: 'Você entrou no clube com sucesso!' });
     return;
@@ -201,6 +203,8 @@ export const aprovarEntrada = asyncHandler(async (req, res) => {
 
   clube.pendentes = clube.pendentes.filter(id => id.toString() !== userId);
   clube.membros.push(userId);
+  // Adiciona o clube à lista de clubes do usuário aprovado
+  await User.findByIdAndUpdate(userId, { $push: { clubes: clube._id } });
 
   await clube.save();
 

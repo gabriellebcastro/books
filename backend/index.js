@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 import userRoutes from './routes/userRoutes.js';
 import bookRoutes from './routes/bookRoutes.js';
 import clubRoutes from './routes/clubRoutes.js';
+import statisticsRoutes from './routes/statisticsRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -35,6 +36,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/clubes', clubRoutes);
+app.use('/api/stats', statisticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

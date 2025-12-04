@@ -13,7 +13,8 @@ import { MeuPerfilPage } from "./components/MeuPerfil";
 import { PlaceholderPage } from "./components/PlaceholderPage";
 import { MeusClubesPage } from "./components/MeusClubes";
 import { LeiturasDoMesPage } from "./components/LeiturasDoMes";
-import { EventosPage } from "./components/EventosPage";
+import { EventosPage } from "./components/EventosPage"; // Keep this as is
+import { EstatisticasPage } from "./EstatisticasPage";
 import { Sidebar } from "./components/Sidebar";
 import "./App.css";
 
@@ -53,7 +54,7 @@ function App() {
         <Route path="/profile" element={<MeuPerfilPage />} />
         <Route 
           path="/estatisticas" 
-          element={<PlaceholderPage title="Minhas Estatísticas" description="Em breve, aqui você verá suas estatísticas de leitura." icon="📊" />} 
+          element={<EstatisticasPage />} 
         />
         <Route 
           path="/configuracoes" 
