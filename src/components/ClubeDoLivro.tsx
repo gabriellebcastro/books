@@ -1,6 +1,9 @@
-// ClubeDoLivro.tsx
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { AdicionarEncontroModal } from './AdicionarEncontroModal';
+import { EditarClubeModal } from './EditarClubeModal';
+import { GerenciarMembrosModal } from './GerenciarMembrosModal';
+import { DefinirLeituraModal } from './DefinirLeituraModal';
 import "./ClubeDoLivro.css";
 
 interface Member {
@@ -8,6 +11,20 @@ interface Member {
   name: string;
   username?: string;
   avatar?: string;
+}
+
+interface Book {
+  _id: string;
+  title: string;
+  author: string;
+  cover: string;
+}
+
+interface Encontro {
+  _id: string;
+  data: string;
+  descricao: string;
+  link?: string;
 }
 
 interface Club {
@@ -19,16 +36,23 @@ interface Club {
   membros: Array<Member | string>;
   administradores: Array<Member | string>;
   tipo?: string;
-  pendentes?: Array<string>;
+  leituraAtual?: Book;
+  encontros?: Encontro[];
+  pendentes?: Array<Member>;
 }
 
 export function ClubeDoLivro() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [clubInfo, setClubInfo] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isLeituraModalOpen, setIsLeituraModalOpen] = useState(false);
+  const [isEncontroModalOpen, setIsEncontroModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isManageMembersModalOpen, setIsManageMembersModalOpen] = useState(false);
 
   // TODO: substituir por ID real do usuário (ex: pegar do token / contexto)
   const currentUserId = localStorage.getItem("userId") || "6685d9457c477f225282b54a";
@@ -101,7 +125,7 @@ export function ClubeDoLivro() {
         // privado: provavelmente resposta diz que solicitação foi enviada
         setMessage(data.message || "Solicitação enviada. Aguarde aprovação.");
         // opcional: adicionar ao pendentes no estado (se quiser)
-        setClubInfo(prev => prev ? { ...prev, pendentes: [...(prev.pendentes || []), String(currentUserId)] } : prev);
+        setClubInfo(prev => prev ? { ...prev, pendentes: [...(prev.pendentes || []), String(currentUserId) as unknown as Member] } : prev);
       }
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Erro desconhecido");
@@ -111,11 +135,86 @@ export function ClubeDoLivro() {
     }
   };
 
+  const handleLeituraDefinida = (clubeAtualizado: Club) => {
+    setClubInfo(prev => prev ? { ...prev, leituraAtual: clubeAtualizado.leituraAtual } : prev);
+    setMessage('Leitura do mês atualizada com sucesso!');
+    setIsLeituraModalOpen(false);
+  };
+
+  const handleEncontroAdicionado = (clubeAtualizado: Club) => {
+    setClubInfo(prev => prev ? { ...prev, encontros: clubeAtualizado.encontros } : prev);
+    setMessage('Encontro adicionado com sucesso!');
+    setIsEncontroModalOpen(false);
+  };
+
+  const handleClubUpdated = (clubeAtualizado: Club) => {
+    setClubInfo(clubeAtualizado);
+    setMessage('Informações do clube atualizadas com sucesso!');
+    setIsEditModalOpen(false);
+  };
+
+  const handleDeleteClube = async () => {
+    if (!window.confirm("Tem certeza que deseja excluir este clube? Esta ação é irreversível.")) {
+      return;
+    }
+
+    setActionLoading(true);
+    setMessage(null);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5000/api/clubes/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Erro ao excluir o clube.");
+
+      alert("Clube excluído com sucesso!");
+      navigate('/clubes');
+
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Erro desconhecido ao excluir.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteEncontro = async (encontroId: string) => {
+    if (!window.confirm("Tem certeza que deseja remover este encontro?")) return;
+
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5000/api/clubes/${id}/encontros/${encontroId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Erro ao remover encontro.");
+
+      setClubInfo(prev => {
+        if (!prev) return prev;
+        const encontrosAtualizados = prev.encontros?.filter(e => e._id !== encontroId);
+        return { ...prev, encontros: encontrosAtualizados };
+      });
+      setMessage("Encontro removido com sucesso.");
+
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Erro desconhecido.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   return (
     <div className="clube-container">
       <header className="clube-header card">
         <img
-          src={`http://localhost:5000${clubInfo.capa.replace(/\\/g, "/")}`}
+          src={clubInfo.capa ? `http://localhost:5000${clubInfo.capa.replace(/\\/g, "/")}` : "/assets/placeholder.jpg"}
           alt={`Capa do clube ${clubInfo.nome}`}
           className="clube-cover-image"
         />
@@ -152,21 +251,49 @@ export function ClubeDoLivro() {
         <div className="clube-left-column">
           <section className="clube-section card">
             <h2>Leitura do Mês</h2>
-            <div className="leitura-mes">
-              <img src={"https://via.placeholder.com/100x150"} alt="Leitura do Mês" className="leitura-mes-cover" />
-              <div className="leitura-mes-details">
-                <h3>A Sociedade do Anel</h3>
-                <p className="author">J.R.R. Tolkien</p>
+            {clubInfo.leituraAtual ? (
+              <div className="leitura-mes">
+                <img src={clubInfo.leituraAtual.cover} alt={clubInfo.leituraAtual.title} className="leitura-mes-cover" />
+                <div className="leitura-mes-details">
+                  <h3>{clubInfo.leituraAtual.title}</h3>
+                  <p className="author">por {clubInfo.leituraAtual.author}</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <p>Nenhuma leitura definida para este mês.</p>
+            )}
+            {isModerator && (
+              <button className="btn-definir-leitura" onClick={() => setIsLeituraModalOpen(true)}>
+                {clubInfo.leituraAtual ? 'Alterar Leitura' : 'Definir Leitura'}
+              </button>
+            )}
           </section>
 
           <section className="clube-section card">
             <h2>Próximos Encontros</h2>
-            <ul className="encontros-list">
-              <li className="encontro-item"><span>25/07 às 19:00 - Online (Discord)</span></li>
-              <li className="encontro-item"><span>08/08 às 19:00 - Online (Discord)</span></li>
-            </ul>
+            {clubInfo.encontros && clubInfo.encontros.length > 0 ? (
+              <ul className="encontros-list">
+                {clubInfo.encontros.map(encontro => (
+                  <li key={encontro._id} className="encontro-item">
+                    <div className="encontro-info">
+                      <span className="encontro-data">{new Date(encontro.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="encontro-desc">{encontro.descricao}</span>
+                      {encontro.link && <a href={encontro.link} target="_blank" rel="noopener noreferrer">Link</a>}
+                    </div>
+                    {isModerator && (
+                      <button className="delete-encontro-btn" onClick={() => handleDeleteEncontro(encontro._id)} disabled={actionLoading}>
+                        &times;
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Nenhum encontro agendado.</p>
+            )}
+            {isModerator && (
+              <button className="btn-adicionar-encontro" onClick={() => setIsEncontroModalOpen(true)}>+ Adicionar Encontro</button>
+            )}
           </section>
         </div>
 
@@ -203,26 +330,65 @@ export function ClubeDoLivro() {
             <>
               <section className="clube-section card">
                 <h2>Solicitações Pendentes</h2>
-                <ul className="solicitacoes-list">
-                  <li className="solicitacao-item">
-                    <span>Carlos</span>
-                    <div className="solicitacao-actions">
-                      <button className="clube-accept-btn">Aprovar</button>
-                      <button className="clube-reject-btn">Rejeitar</button>
-                    </div>
-                  </li>
-                </ul>
+                {clubInfo.pendentes && clubInfo.pendentes.length > 0 ? (
+                  <ul className="solicitacoes-list">
+                    {clubInfo.pendentes.map(user => (
+                      <li key={user._id} className="solicitacao-item">
+                        <span>{user.name}</span>
+                        <div className="solicitacao-actions">
+                          <button className="clube-accept-btn">Aprovar</button>
+                          <button className="clube-reject-btn">Rejeitar</button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>Nenhuma solicitação pendente no momento.</p>
+                )}
               </section>
 
               <section className="clube-section card">
                 <h2>Configurações do Clube</h2>
-                <button>Editar Informações</button>
-                <button>Gerenciar Membros</button>
+                <button onClick={() => setIsEditModalOpen(true)}>Editar Informações</button>
+                <button onClick={() => setIsManageMembersModalOpen(true)}>Gerenciar Membros</button>
+                <button className="clube-delete-btn" onClick={handleDeleteClube} disabled={actionLoading}>Excluir Clube</button>
               </section>
             </>
           )}
         </div>
       </main>
+
+      {isLeituraModalOpen && (
+        <DefinirLeituraModal
+          clubId={clubInfo._id}
+          onClose={() => setIsLeituraModalOpen(false)}
+          onSave={handleLeituraDefinida}
+        />
+      )}
+
+      {isEncontroModalOpen && (
+        <AdicionarEncontroModal
+          clubId={clubInfo._id}
+          onClose={() => setIsEncontroModalOpen(false)}
+          onSave={handleEncontroAdicionado}
+        />
+      )}
+
+      {isEditModalOpen && (
+        <EditarClubeModal
+          clube={clubInfo}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleClubUpdated}
+        />
+      )}
+
+      {isManageMembersModalOpen && (
+        <GerenciarMembrosModal
+          clube={clubInfo}
+          onClose={() => setIsManageMembersModalOpen(false)}
+          onMembersUpdate={(updatedClub) => setClubInfo(updatedClub)}
+        />
+      )}
     </div>
   );
 }

@@ -81,7 +81,7 @@ export function LeiturasDoMesPage() {
                     <h3>{clube.leituraAtual!.title}</h3>
                     <p className="author">de {clube.leituraAtual!.author}</p>
                     <Link to={`/clubes/${clube._id}`} className="leitura-card-clube-link">
-                      <img src={`http://localhost:5000${clube.capa.replace(/\\/g, '/')}`} alt={clube.nome} className="clube-avatar-small" />
+                      <img src={clube.capa ? `http://localhost:5000${clube.capa.replace(/\\/g, '/')}` : "/assets/placeholder.jpg"} alt={clube.nome} className="clube-avatar-small" />
                       <span>{clube.nome}</span>
                     </Link>
                   </div>

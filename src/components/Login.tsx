@@ -29,9 +29,10 @@ export function LoginForm() {
         password: form.password,
       });
 
-      const { token } = response.data;
+      const { token, _id } = response.data;
 
       localStorage.setItem("token", token);
+      localStorage.setItem("userId", _id); // Salva o ID do usuário
       setMessage("Login realizado com sucesso!");
 
       // Redireciona para a página principal (ajuste a rota conforme seu projeto)

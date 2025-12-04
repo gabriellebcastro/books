@@ -7,6 +7,12 @@ import {
   entrarNoClube,
   aprovarEntrada,
   promoverAdmin,
+  updateClube,
+  deleteClube,
+  removeMembro,
+  setLeituraAtual,
+  addEncontro,
+  deleteEncontro,
 } from '../controllers/clubController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
@@ -18,14 +24,22 @@ router.route('/')
   .post(protect, upload.single('capa'), criarClube)
   .get(getClubes);
 
+// Rota para buscar os clubes do usuário logado (deve vir antes de /:id)
+router.route('/meus-clubes').get(protect, getMeusClubes);
+
 // Rotas específicas por ID
 router.route('/:id')
-  .get(getClubeById);
+  .get(getClubeById)
+  .put(protect, upload.single('capa'), updateClube)
+  .delete(protect, deleteClube);
 
 // Rotas de ações do clube
 router.post('/:id/entrar', protect, entrarNoClube);
 router.post('/:id/aprovar/:userId', protect, aprovarEntrada);
 router.post('/:id/promover/:userId', protect, promoverAdmin);
-router.route('/meus-clubes').get(protect, getMeusClubes);
+router.put('/:id/leitura', protect, setLeituraAtual);
+router.delete('/:id/membros/:memberId', protect, removeMembro);
+router.post('/:id/encontros', protect, addEncontro);
+router.delete('/:id/encontros/:encontroId', protect, deleteEncontro);
 
 export default router;

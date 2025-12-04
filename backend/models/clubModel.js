@@ -49,6 +49,18 @@ const clubSchema = mongoose.Schema(
         ref: 'User',
       },
     ],
+    leituraAtual: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Book',
+      required: false,
+    },
+    encontros: [
+      {
+        data: { type: Date, required: true },
+        descricao: { type: String, required: true },
+        link: { type: String, required: false },
+      },
+    ],
   },
   {
     timestamps: true,

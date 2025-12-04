@@ -64,7 +64,7 @@ export function MeusClubesPage() {
               {meusClubes.map(clube => (
                 <div key={clube._id} className="club-card">
                   <img
-                    src={`http://localhost:5000${clube.capa.replace(/\\/g, '/')}`}
+                    src={clube.capa ? `http://localhost:5000${clube.capa.replace(/\\/g, '/')}` : "/assets/placeholder.jpg"}
                     alt={clube.nome}
                     className="club-card-img"
                   />
