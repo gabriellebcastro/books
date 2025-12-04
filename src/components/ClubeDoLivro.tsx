@@ -7,6 +7,7 @@ interface Member {
   _id: string;
   name: string;
   username?: string;
+  avatar?: string;
 }
 
 interface Club {
@@ -20,8 +21,6 @@ interface Club {
   tipo?: string;
   pendentes?: Array<string>;
 }
-
-const placeholderAvatar = "https://via.placeholder.com/150";
 
 export function ClubeDoLivro() {
   const { id } = useParams<{ id: string }>();
@@ -183,10 +182,15 @@ export function ClubeDoLivro() {
               {clubInfo.membros && clubInfo.membros.map((member) => {
                 const mid = typeof member === "string" ? member : member._id;
                 const name = typeof member === "string" ? member : member.name;
+                const username = typeof member === "string" ? name : member.username || name;
+                const avatarStyle = typeof member === "string" ? 'initials' : member.avatar || 'initials';
                 const isAdmin = (clubInfo.administradores || []).some(a => (typeof a === "string" ? a : a._id) === mid);
                 return (
                   <div key={mid} className="member-item">
-                    <img src={placeholderAvatar} alt={String(name)} className="member-avatar" />
+                    <img 
+                      src={`https://api.dicebear.com/8.x/${avatarStyle}/svg?seed=${username}`} 
+                      alt={`Avatar de ${String(name)}`} 
+                      className="member-avatar" />
                     <span className="member-name">{name}</span>
                     {isAdmin && <span className="member-role">Admin</span>}
                   </div>

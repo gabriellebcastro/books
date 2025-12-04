@@ -11,6 +11,8 @@ import { CreateClub } from "./components/CreateClub";
 import { ExplorarPage } from "./components/Explorar";
 import { MeuPerfilPage } from "./components/MeuPerfil";
 import { PlaceholderPage } from "./components/PlaceholderPage";
+import { MeusClubesPage } from "./components/MeusClubes";
+import { LeiturasDoMesPage } from "./components/LeiturasDoMes";
 import { Sidebar } from "./components/Sidebar";
 import "./App.css";
 
@@ -44,9 +46,9 @@ function App() {
         <Route path="/create-club" element={<CreateClub />} />
         
         {/* Placeholder routes for new sidebar links */}
-        <Route path="/meus-clubes" element={<div>Página de Meus Clubes</div>} />
-        <Route path="/leituras-do-mes" element={<div>Página de Leituras do Mês</div>} />
-        <Route path="/eventos" element={<div>Página de Próximos Encontros</div>} />
+        <Route path="/meus-clubes" element={<MeusClubesPage />} />
+        <Route path="/leituras-do-mes" element={<LeiturasDoMesPage />} />
+        <Route path="/eventos" element={<PlaceholderPage title="Próximos Encontros" description="Em breve, aqui você verá os eventos dos seus clubes." icon="🎉" />} />
         <Route path="/profile" element={<MeuPerfilPage />} />
         <Route 
           path="/estatisticas" 

@@ -4,6 +4,7 @@ import {
   authUser,
   registerUser,
   getUserProfile,
+  updateUserProfile,
 } from '../controllers/userController.js';
 import {
   getUserBooks,
@@ -20,7 +21,10 @@ router.route('/').post(registerUser);
 router.post('/login', authUser);
 
 // Rota para buscar o perfil do usuário logado (protegida)
-router.route('/profile').get(protect, getUserProfile);
+router
+  .route('/profile')
+  .get(protect, getUserProfile)
+  .put(protect, updateUserProfile);
 
 // Rotas para a estante de livros do usuário (protegidas)
 router

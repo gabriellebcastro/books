@@ -38,7 +38,7 @@ export const criarClube = async (req, res) => {
 // @access  Public
 export const getClubes = async (req, res) => {
   try {
-    const clubes = await Club.find({}).populate('administradores', 'name username');
+    const clubes = await Club.find({}).populate('administradores', 'name username avatar');
     res.json(clubes);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao buscar os clubes' });
@@ -51,9 +51,9 @@ export const getClubes = async (req, res) => {
 export const getClubeById = async (req, res) => {
   try {
     const clube = await Club.findById(req.params.id)
-      .populate('administradores', 'name username')
-      .populate('membros', 'name username')
-      .populate('pendentes', 'name username');
+      .populate('administradores', 'name username avatar')
+      .populate('membros', 'name username avatar')
+      .populate('pendentes', 'name username avatar');
       
     if (clube) {
       res.json(clube);
@@ -190,7 +190,7 @@ export const getMeusClubes = async (req, res) => {
         { membros: userId },
         { administradores: userId }
       ]
-    }).populate('administradores', 'name username').populate('membros', 'name username');
+    }).populate('administradores', 'name username avatar').populate('membros', 'name username avatar');
     res.json(clubes);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao buscar seus clubes' });

@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import './MeuPerfil.css'; // Criaremos este arquivo de estilo a seguir
+import './MeuPerfil.css';
+import { EditarPerfilModal } from '../EditarPerfilModal.tsx';
 
 type Usuario = {
+  _id: string;
   name: string;
   username: string;
   email: string;
   createdAt: string;
+  avatar: string;
 };
 
 export function MeuPerfilPage() {
@@ -14,6 +17,7 @@ export function MeuPerfilPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   useEffect(() => {
     const fetchUserProfile = async () => {
       const token = localStorage.getItem('token');
@@ -48,12 +52,16 @@ export function MeuPerfilPage() {
     return <div className="profile-container"><p className="error-message">{error}</p></div>;
   }
 
+  const handleSaveProfile = (updatedUser: Usuario) => {
+    setUser(updatedUser);
+  };
+
   return (
     <div className="profile-container">
       <div className="profile-card">
         <div className="profile-header">
           <img 
-            src={`https://api.dicebear.com/8.x/initials/svg?seed=${user?.name}`} 
+            src={`https://api.dicebear.com/8.x/${user?.avatar || 'initials'}/svg?seed=${user?.username}`} 
             alt="Avatar" 
             className="profile-avatar"
           />
@@ -61,7 +69,9 @@ export function MeuPerfilPage() {
             <h1>{user?.name}</h1>
             <p>@{user?.username}</p>
           </div>
-          <button className="btn-edit-profile">Editar Perfil</button>
+          <button className="btn-edit-profile" onClick={() => setIsEditModalOpen(true)}>
+            Editar Perfil
+          </button>
         </div>
 
         <div className="profile-details">
@@ -80,6 +90,14 @@ export function MeuPerfilPage() {
           <button className="btn-action-secondary">Alterar Senha</button>
         </div>
       </div>
+
+      {isEditModalOpen && user && (
+        <EditarPerfilModal 
+          user={user}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSaveProfile}
+        />
+      )}
     </div>
   );
 }

@@ -1,0 +1,24 @@
+[33mc154c32[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Ajustes visuais sidebar, Melhorias Meu Perfil e adição Explorar
+[33me975e4b[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Criando rotas para listar clubes do usário
+[33m5a144db[m Ajustes da lógica de Clube do Livro
+[33m7f86281[m Configurando rotas e exibição de Clubes do Livro
+[33m9dbec67[m Implementando cadastro de clubes
+[33m78edd41[m Removendo Navbar
+[33mf16e09b[m Ajustando rotas, modal de livro e layout da página
+[33ma6ee1f3[m Ajustando layout
+[33ma74a624[m Criando telas de clubes do livro
+[33m7c699d6[m Ajustando estilo da biblioteca
+[33m451428b[m Implementando notas, status e botão de favorito
+[33md9dad7b[m Ajustando o README
+[33m9b76160[m Adicionando filtros por gênero e ordem alfabética
+[33m9145dbe[m Refatorando código - Minha Biblioteca
+[33m0148e15[m Ajustes tela inicial e cadastro de livros
+[33m8585d9d[m Ajustando cadastro de livros com o MongoDB
+[33m797dd9e[m Ajustando Login e Registro com o Backend
+[33m095cd29[m Finalizando configuração e conexão com MongoDB
+[33m0624f95[m Configurando autenticação
+[33m95e1ce4[m Configurando conexão com o banco de dados
+[33m81e3e3b[m Criando a estrutura do Backend
+[33mbee4e98[m Criação de tela de cadastro de livro
+[33m2c28a07[m Ajustando exibição de livros
+[33mddfef70[m Commit inicial
