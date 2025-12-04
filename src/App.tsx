@@ -8,6 +8,9 @@ import { CadastrarLivro } from "./components/CadastrarLivro";
 import { ClubeDoLivro } from "./components/ClubeDoLivro";
 import { Clubes } from "./components/Clubes";
 import { CreateClub } from "./components/CreateClub";
+import { ExplorarPage } from "./components/Explorar";
+import { MeuPerfilPage } from "./components/MeuPerfil";
+import { PlaceholderPage } from "./components/PlaceholderPage";
 import { Sidebar } from "./components/Sidebar";
 import "./App.css";
 
@@ -33,6 +36,7 @@ function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<Navigate to="/home" replace />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/explorar" element={<ExplorarPage />} />
         <Route path="/biblioteca/:filter?" element={<MinhaBibliotecaPage />} />
         <Route path="/cadastrar-livro" element={<CadastrarLivro />} />
         <Route path="/clubes/:id" element={<ClubeDoLivro />} />
@@ -43,9 +47,15 @@ function App() {
         <Route path="/meus-clubes" element={<div>Página de Meus Clubes</div>} />
         <Route path="/leituras-do-mes" element={<div>Página de Leituras do Mês</div>} />
         <Route path="/eventos" element={<div>Página de Próximos Encontros</div>} />
-        <Route path="/profile" element={<div>Página de Meu Perfil</div>} />
-        <Route path="/estatisticas" element={<div>Página de Minhas Estatísticas</div>} />
-        <Route path="/configuracoes" element={<div>Página de Configurações</div>} />
+        <Route path="/profile" element={<MeuPerfilPage />} />
+        <Route 
+          path="/estatisticas" 
+          element={<PlaceholderPage title="Minhas Estatísticas" description="Em breve, aqui você verá suas estatísticas de leitura." icon="📊" />} 
+        />
+        <Route 
+          path="/configuracoes" 
+          element={<PlaceholderPage title="Configurações" description="Em breve, aqui você poderá configurar suas preferências." icon="⚙️" />} 
+        />
       </Route>
     </Routes>
   );

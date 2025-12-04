@@ -1,0 +1,31 @@
+.placeholder-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  background-color: #f9fafb;
+  padding: 2rem;
+}
+
+.placeholder-content {
+  max-width: 500px;
+}
+
+.placeholder-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  color: #d1d5db;
+}
+
+.placeholder-content h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.placeholder-content p {
+  font-size: 1.1rem;
+  color: #6b7280;
+}

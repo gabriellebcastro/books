@@ -62,7 +62,7 @@
   letter-spacing: 0.5px;
 }
 
-.sidebar-nav a, .sidebar-logout-btn {
+.sidebar-nav a, .sidebar-footer a, .sidebar-logout-btn {
   display: flex;
   align-items: center;
   padding: 12px 10px;
@@ -75,12 +75,12 @@
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.sidebar-nav a:hover, .sidebar-logout-btn:hover {
+.sidebar-nav a:hover, .sidebar-footer a:hover, .sidebar-logout-btn:hover {
   background-color: var(--sidebar-hover-bg);
   color: #000;
 }
 
-.sidebar-nav a.active {
+.sidebar-nav a.active, .sidebar-footer a.active {
   background-color: var(--sidebar-active-bg);
   font-weight: 600;
   color: var(--primary-color);

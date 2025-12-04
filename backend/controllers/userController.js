@@ -77,6 +77,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       username: user.username,
+      createdAt: user.createdAt,
     });
   } else {
     res.status(404);

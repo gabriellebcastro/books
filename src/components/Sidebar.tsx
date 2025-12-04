@@ -26,6 +26,7 @@ export function Sidebar() {
       <nav className="sidebar-nav">
         <ul>
           <li>{getLink('/home', '🏠', 'Home')}</li>
+          <li>{getLink('/explorar', '🔭', 'Explorar')}</li>
           
           <li className="sidebar-section-title">Minha Biblioteca</li>
           <li>{getLink('/biblioteca/todos', '📚', 'Todos os livros')}</li>
