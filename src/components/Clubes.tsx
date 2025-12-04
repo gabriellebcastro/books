@@ -8,11 +8,13 @@ interface Clube {
     capa: string;
     descricao: string;
     membros: any[];
+    leituraAtual?: { title: string };
 }
 
 export function Clubes() {
     const [clubes, setClubes] = useState<Clube[]>([]);
     const [termoBusca, setTermoBusca] = useState('');
+    const [clubeDoMes, setClubeDoMes] = useState<Clube | null>(null);
 
     useEffect(() => {
         const fetchClubes = async () => {
@@ -29,10 +31,25 @@ export function Clubes() {
             }
         };
         fetchClubes();
+
+        const fetchClubeDoMes = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/clubes/clube-do-mes');
+                if (response.ok) {
+                    setClubeDoMes(await response.json());
+                }
+            } catch (error) {
+                console.error('Erro ao buscar clube do mês:', error);
+            }
+        };
+        fetchClubeDoMes();
     }, []);
 
     const clubesAleatorios = useMemo(() => {
-        return [...clubes].sort(() => 0.5 - Math.random()).slice(0, 5);
+        // Pega 5 clubes aleatórios
+        return clubes
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 5);
     }, [clubes]);
 
     const clubesFiltrados = clubes.filter(clube =>
@@ -93,30 +110,30 @@ export function Clubes() {
                 </section>
 
                 {/* CLUBES DESTAQUE DO MÊS */}
-                <section className="section-container">
-                    <h2 className="section-title">Clubes Destaque do Mês</h2>
-
-                    <div className="featured-club-card">
-                        <img
-                            src="/assets/clube-mes.jpg" // Imagem de exemplo
-                            alt="Clube do Mês"
-                            className="featured-club-img"
-                        />
-
-                        <div className="featured-club-body">
-                            <h3>A Sociedade dos Leitores Noturnos</h3>
-                            <p className="featured-club-author">Livro do mês: "O Conto da Aia"</p>
-                            <p>
-                                Este mês, estamos lendo "O Conto da Aia" de Margaret Atwood.
-                                Junte-se a nós para uma discussão profunda sobre temas de poder, gênero e resistência.
-                            </p>
-
-                            <Link to="#" className="btn btn-primary">
-                                Saiba Mais
-                            </Link>
+                {clubeDoMes && (
+                    <section className="section-container">
+                        <h2 className="section-title">Clube Destaque do Mês</h2>
+                        <div className="featured-club-card">
+                            <img
+                                src={clubeDoMes.capa ? `http://localhost:5000${clubeDoMes.capa.replace(/\\/g, '/')}` : "/assets/placeholder.jpg"}
+                                alt={`Capa do ${clubeDoMes.nome}`}
+                                className="featured-club-img"
+                            />
+                            <div className="featured-club-body">
+                                <h3>{clubeDoMes.nome}</h3>
+                                {clubeDoMes.leituraAtual && (
+                                    <p className="featured-club-author">
+                                        Livro do mês: "{clubeDoMes.leituraAtual.title}"
+                                    </p>
+                                )}
+                                <p>{clubeDoMes.descricao}</p>
+                                <Link to={`/clubes/${clubeDoMes._id}`} className="btn btn-primary">
+                                    Ver Clube
+                                </Link>
+                            </div>
                         </div>
-                    </div>
-                </section>
+                    </section>
+                )}
 
                 {/* ENCONTROS RECOMENDADOS */}
                 <section className="section-container">

@@ -2,6 +2,8 @@ import Club from '../models/clubModel.js';
 import Book from '../models/bookModel.js';
 import User from '../models/userModel.js';
 import asyncHandler from 'express-async-handler';
+import ClubStats from '../models/clubStatsModel.js';
+import { incrementNewMemberCount } from '../services/clubService.js';
 
 // @desc    Criar um novo clube
 // @route   POST /api/clubes
@@ -168,6 +170,9 @@ export const entrarNoClube = asyncHandler(async (req, res) => {
     clube.membros.push(userId);
     // Adiciona o clube à lista de clubes do usuário
     await User.findByIdAndUpdate(userId, { $push: { clubes: clube._id } });
+    // TRIGGER: Incrementa a contagem de novos membros para o mês
+    await incrementNewMemberCount(clube._id);
+
     await clube.save();
     res.json({ message: 'Você entrou no clube com sucesso!' });
     return;
@@ -216,6 +221,9 @@ export const aprovarEntrada = asyncHandler(async (req, res) => {
   clube.membros.push(userId);
   // Adiciona o clube à lista de clubes do usuário aprovado
   await User.findByIdAndUpdate(userId, { $push: { clubes: clube._id } });
+
+  // TRIGGER: Incrementa a contagem de novos membros para o mês
+  await incrementNewMemberCount(clube._id);
 
   await clube.save();
 
@@ -481,4 +489,32 @@ export const getMeusClubes = asyncHandler(async (req, res) => {
   ]);
 
   res.json(clubes);
+});
+
+// @desc    Obter o clube do mês
+// @route   GET /api/clubes/clube-do-mes
+// @access  Public
+export const getClubeDoMes = asyncHandler(async (req, res) => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1; // getMonth() é 0-11
+
+  const topClubStat = await ClubStats.findOne({ year, month })
+    .sort({ newMembersCount: -1 })
+    .limit(1);
+
+  if (!topClubStat || topClubStat.newMembersCount === 0) {
+    // Se não houver estatísticas ou nenhum novo membro este mês, podemos retornar nada
+    // ou um clube aleatório como destaque. Por enquanto, retornamos nada.
+    res.json(null);
+    return;
+  }
+
+  const clubeDoMes = await Club.findById(topClubStat.club).populate('membros', '_id');
+
+  if (!clubeDoMes) {
+    return res.json(null);
+  }
+
+  res.json(clubeDoMes);
 });

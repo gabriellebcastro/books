@@ -14,6 +14,7 @@ import {
   setLeituraAtual,
   addEncontro,
   sairDoClube,
+  getClubeDoMes,
   deleteEncontro,
 } from '../controllers/clubController.js';
 import { protect } from '../middleware/authMiddleware.js';
@@ -28,6 +29,9 @@ router.route('/')
 
 // Rota para buscar os clubes do usuário logado (deve vir antes de /:id)
 router.route('/meus-clubes').get(protect, getMeusClubes);
+
+// Rota para buscar o clube do mês
+router.route('/clube-do-mes').get(getClubeDoMes);
 
 // Rotas específicas por ID
 router.route('/:id')
