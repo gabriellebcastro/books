@@ -6,12 +6,14 @@ import {
   getClubeById,
   entrarNoClube,
   aprovarEntrada,
+  rejeitarEntrada,
   promoverAdmin,
   updateClube,
   deleteClube,
   removeMembro,
   setLeituraAtual,
   addEncontro,
+  sairDoClube,
   deleteEncontro,
 } from '../controllers/clubController.js';
 import { protect } from '../middleware/authMiddleware.js';
@@ -36,7 +38,9 @@ router.route('/:id')
 // Rotas de ações do clube
 router.post('/:id/entrar', protect, entrarNoClube);
 router.post('/:id/aprovar/:userId', protect, aprovarEntrada);
+router.post('/:id/rejeitar/:userId', protect, rejeitarEntrada);
 router.post('/:id/promover/:userId', protect, promoverAdmin);
+router.post('/:id/sair', protect, sairDoClube);
 router.put('/:id/leitura', protect, setLeituraAtual);
 router.delete('/:id/membros/:memberId', protect, removeMembro);
 router.post('/:id/encontros', protect, addEncontro);

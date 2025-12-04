@@ -7,11 +7,18 @@ import asyncHandler from 'express-async-handler';
 // @route   POST /api/clubes
 // @access  Private
 export const criarClube = asyncHandler(async (req, res) => {
-  const { nome, descricao, genero, tipo, limite, regras } = req.body;
-  const capa = req.file ? `/uploads/${req.file.filename}` : null;
+  const { nome, descricao, genero, tipo, limite, regras, capaUrl } = req.body;
 
   // Processa os gêneros: transforma a string separada por vírgulas em um array
   const generosArray = genero ? genero.split(',').map(g => g.trim()).filter(g => g) : [];
+
+  // Define a capa: prioriza o upload, depois a URL, e por último o padrão.
+  let capa;
+  if (req.file) {
+    capa = `/uploads/${req.file.filename}`;
+  } else {
+    capa = capaUrl || `https://via.placeholder.com/400x400.png/f0f0f0/333333?text=?`;
+  }
 
   const novoClube = new Club({
     nome,
@@ -87,11 +94,15 @@ export const updateClube = asyncHandler(async (req, res) => {
   clube.limite = req.body.limite || clube.limite;
   clube.regras = req.body.regras || clube.regras;
 
-  if (req.body.genero) {
-    clube.genero = req.body.genero.split(',').map(g => g.trim()).filter(g => g);
-  }
+  // Atualiza a capa se uma nova foi enviada (arquivo ou URL)
   if (req.file) {
     clube.capa = `/uploads/${req.file.filename}`;
+  } else if (req.body.capaUrl) {
+    clube.capa = req.body.capaUrl;
+  }
+
+  if (req.body.genero) {
+    clube.genero = req.body.genero.split(',').map(g => g.trim()).filter(g => g);
   }
 
   const clubeAtualizado = await clube.save();
@@ -209,6 +220,38 @@ export const aprovarEntrada = asyncHandler(async (req, res) => {
   await clube.save();
 
   res.json({ message: 'Usuário aprovado com sucesso!' });
+});
+
+// @desc    Rejeitar entrada de usuário em clube privado
+// @route   POST /api/clubes/:id/rejeitar/:userId
+// @access  Private (Admin)
+export const rejeitarEntrada = asyncHandler(async (req, res) => {
+  const clube = await Club.findById(req.params.id);
+
+  if (!clube) {
+    res.status(404);
+    throw new Error('Clube não encontrado');
+  }
+
+  const adminId = req.user._id.toString();
+  const userIdToReject = req.params.userId.toString();
+
+  const isAdmin = clube.administradores.some(id => id.toString() === adminId);
+  if (!isAdmin) {
+    res.status(403);
+    throw new Error('Ação não autorizada. Apenas administradores podem gerenciar solicitações.');
+  }
+
+  // Verifica se o usuário está realmente pendente
+  if (!clube.pendentes.some(id => id.toString() === userIdToReject)) {
+    res.status(400);
+    throw new Error('Usuário não encontrado na lista de pendentes.');
+  }
+
+  clube.pendentes.pull(userIdToReject);
+  await clube.save();
+
+  res.json({ message: 'Solicitação rejeitada com sucesso.', pendentes: clube.pendentes });
 });
 
 // @desc    Promover um membro a administrador
@@ -377,6 +420,48 @@ export const deleteEncontro = asyncHandler(async (req, res) => {
   await clube.save();
 
   res.json({ message: 'Encontro removido com sucesso.' });
+});
+
+// @desc    Sair de um clube
+// @route   POST /api/clubes/:id/sair
+// @access  Private
+export const sairDoClube = asyncHandler(async (req, res) => {
+  const clube = await Club.findById(req.params.id);
+
+  if (!clube) {
+    res.status(404);
+    throw new Error('Clube não encontrado');
+  }
+
+  const userId = req.user._id.toString();
+  const isAdmin = clube.administradores.some(id => id.toString() === userId);
+
+  if (isAdmin) {
+    // Um administrador só pode sair se for o único membro/admin no clube.
+    // Se ele for o último, sair do clube o excluirá.
+    if (clube.membros.length > 0 || clube.administradores.length > 1) {
+      res.status(400);
+      throw new Error('Como administrador, você não pode sair de um clube com outros membros. Por favor, promova outro membro a administrador ou remova todos os membros antes de sair.');
+    }
+
+    // Se o admin é o último, o clube é excluído.
+    await User.findByIdAndUpdate(userId, { $pull: { clubes: clube._id } });
+    await Club.deleteOne({ _id: req.params.id });
+    res.json({ message: 'Você saiu e o clube foi excluído por ser o último membro.' });
+
+  } else {
+    // Lógica para membros comuns
+    const isMember = clube.membros.some(id => id.toString() === userId);
+    if (!isMember) {
+      res.status(400);
+      throw new Error('Você não é membro deste clube.');
+    }
+
+    clube.membros.pull(userId);
+    await User.findByIdAndUpdate(userId, { $pull: { clubes: clube._id } });
+    await clube.save();
+    res.json({ message: 'Você saiu do clube com sucesso.' });
+  }
 });
 
 export const getMeusClubes = asyncHandler(async (req, res) => {

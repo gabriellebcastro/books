@@ -27,6 +27,7 @@ export function EditarClubeModal({ clube, onClose, onSave }: EditarClubeModalPro
   const [limite, setLimite] = useState(clube.limite?.toString() || '');
   const [regras, setRegras] = useState(clube.regras || '');
   const [capa, setCapa] = useState<File | null>(null);
+  const [capaUrl, setCapaUrl] = useState(clube.capa && clube.capa.startsWith('http') ? clube.capa : '');
   const [imagePreview, setImagePreview] = useState<string | null>(clube.capa ? `http://localhost:5000${clube.capa.replace(/\\/g, "/")}` : null);
   const [error, setError] = useState('');
 
@@ -44,6 +45,13 @@ export function EditarClubeModal({ clube, onClose, onSave }: EditarClubeModalPro
     }
   };
 
+  const handleLoadUrl = () => {
+    // When loading from URL, clear any selected file and set the preview
+    setCapa(null);
+    // Use the URL directly for the preview
+    setImagePreview(capaUrl);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -57,6 +65,8 @@ export function EditarClubeModal({ clube, onClose, onSave }: EditarClubeModalPro
     if (regras) formData.append('regras', regras);
     if (capa) {
       formData.append('capa', capa);
+    } else if (capaUrl) {
+      formData.append('capaUrl', capaUrl);
     }
 
     const token = localStorage.getItem('token');
@@ -68,9 +78,7 @@ export function EditarClubeModal({ clube, onClose, onSave }: EditarClubeModalPro
     try {
       const response = await fetch(`http://localhost:5000/api/clubes/${clube._id}`, {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` }, // Let the browser set Content-Type
         body: formData,
       });
 
@@ -132,6 +140,20 @@ export function EditarClubeModal({ clube, onClose, onSave }: EditarClubeModalPro
                 <img src={imagePreview} alt="Pré-visualização da capa" />
               </div>
             )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="coverUrl">Ou URL da Imagem de Capa</label>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <input
+                type="text"
+                id="coverUrl"
+                placeholder="https://exemplo.com/imagem.jpg"
+                value={capaUrl}
+                onChange={(e) => setCapaUrl(e.target.value)}
+              />
+              <button type="button" className="btn btn-secondary" onClick={handleLoadUrl}>Carregar</button>
+            </div>
           </div>
 
           <div className="form-group">

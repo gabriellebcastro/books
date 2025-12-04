@@ -10,6 +10,7 @@ export function CreateClub() {
   const [limite, setLimite] = useState('');
   const [regras, setRegras] = useState('');
   const [capa, setCapa] = useState<File | null>(null);
+  const [capaUrl, setCapaUrl] = useState('');
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -26,6 +27,12 @@ export function CreateClub() {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleLoadUrl = () => {
+    // When loading from URL, clear any selected file and set the preview
+    setCapa(null);
+    setImagePreview(capaUrl);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,6 +53,9 @@ export function CreateClub() {
     if (regras) formData.append('regras', regras);
     if (capa) {
       formData.append('capa', capa);
+    } else if (capaUrl) {
+      // Adiciona a URL da capa ao FormData se não houver arquivo
+      formData.append('capaUrl', capaUrl);
     }
 
     const token = localStorage.getItem('token');
@@ -56,12 +66,10 @@ export function CreateClub() {
 
     try {
       const response = await fetch('http://localhost:5000/api/clubes', {
-  method: 'POST',
-  headers: {
-    Authorization: `Bearer ${token}`,
-  },
-  body: formData,
-});
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }, // Let the browser set Content-Type
+        body: formData,
+      });
 
 
       if (!response.ok) {
@@ -160,6 +168,20 @@ export function CreateClub() {
                   <img src={imagePreview} alt="Pré-visualização da capa" />
                 </div>
               )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="coverUrl">Ou URL da Imagem de Capa</label>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input
+                  type="text"
+                  id="coverUrl"
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  value={capaUrl}
+                  onChange={(e) => setCapaUrl(e.target.value)}
+                />
+                <button type="button" className="btn btn-secondary" onClick={handleLoadUrl}>Carregar</button>
+              </div>
             </div>
 
             <div className="form-group">

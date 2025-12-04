@@ -1,0 +1,106 @@
+.meus-clubes-container {
+  width: 100%;
+}
+
+.meus-clubes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.meu-clube-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  color: var(--primary-text);
+}
+
+.meu-clube-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px var(--shadow-hover-color);
+}
+
+.meu-clube-card-banner {
+  height: 120px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.meu-clube-card-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+}
+
+.meu-clube-card-body {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.meu-clube-card-body h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.meu-clube-card-body p {
+  font-size: 0.9rem;
+  color: var(--secondary-text);
+  line-height: 1.5;
+  flex-grow: 1;
+  margin-bottom: 1.5rem;
+  /* Limita a descrição a 3 linhas */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}
+
+.meu-clube-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color-light);
+  font-size: 0.9rem;
+  color: var(--secondary-text);
+}
+
+.no-clubes-container {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+}
+
+.no-clubes-container .icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--secondary-text);
+}
+
+.no-clubes-container p {
+  font-size: 1.1rem;
+  color: var(--secondary-text);
+  margin-bottom: 1.5rem;
+}
+
+.no-clubes-container .btn {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
