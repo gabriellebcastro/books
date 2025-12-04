@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import "./MinhaBiblioteca.css";
 import "./BookModal.css";
+import { ReviewModal } from "./ReviewModal";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from 'axios';
 
@@ -20,6 +21,7 @@ type UserBook = {
   status: string;
   favorite: boolean;
   rating: number;
+  review?: string;
   _id: string;
 };
 
@@ -28,6 +30,8 @@ export function MinhaBibliotecaPage() {
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBook, setSelectedBook] = useState<UserBook | null>(null);
+  const [bookToReview, setBookToReview] = useState<UserBook | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedGenre, setSelectedGenre] = useState<string>("");
@@ -146,11 +150,20 @@ export function MinhaBibliotecaPage() {
     }
   };
 
-  const handleUpdateBookDetails = async (bookId: string, details: { status?: string; favorite?: boolean; rating?: number }) => {
+  const handleUpdateBookDetails = async (bookId: string, details: Partial<UserBook>) => {
+    // Se o status for 'lido', abre o modal de review em vez de salvar direto
+    if (details.status === 'lido') {
+      const book = myBooks.find(ub => ub.book._id === bookId);
+      if (book) {
+        setBookToReview(book);
+        setIsReviewModalOpen(true);
+        handleCloseModal(); // Fecha o modal de detalhes
+      }
+      return;
+    }
+
     const originalBooks = [...myBooks];
-    const updatedBooks = myBooks.map(ub =>
-      ub.book._id === bookId ? { ...ub, ...details } : ub
-    );
+    const updatedBooks = myBooks.map(ub => ub.book._id === bookId ? { ...ub, ...details } : ub);
     setMyBooks(updatedBooks);
     setSelectedBook(prev => prev && prev.book._id === bookId ? { ...prev, ...details } : prev);
 
@@ -161,6 +174,29 @@ export function MinhaBibliotecaPage() {
         alert('Falha ao atualizar o livro.');
         setMyBooks(originalBooks); // Revert on error
         setSelectedBook(originalBooks.find(ub => ub.book._id === bookId) || null);
+    }
+  };
+
+  const handleSaveReview = async (bookId: string, reviewData: { rating: number; review?: string }) => {
+    const detailsToUpdate = {
+      ...reviewData,
+      status: 'lido',
+    };
+
+    try {
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      await axios.put(`http://localhost:5000/api/users/mybooks/${bookId}`, detailsToUpdate, config);
+      
+      // Atualiza o estado local com os novos dados
+      const updatedBooks = myBooks.map(ub => 
+        ub.book._id === bookId ? { ...ub, ...detailsToUpdate } : ub
+      );
+      setMyBooks(updatedBooks);
+      setIsReviewModalOpen(false);
+      setBookToReview(null);
+      alert('Sua avaliação foi salva com sucesso!');
+    } catch (err) {
+      alert('Falha ao salvar a avaliação.');
     }
   };
 
@@ -316,25 +352,27 @@ export function MinhaBibliotecaPage() {
                       <p>{selectedBook.book.synopsis}</p>
                     </div>
                     
-                    <div className="modal-section">
-                      <h4>Sua Avaliação</h4>
-                      <div className="rating-stars-redesigned">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <span
-                            key={star}
-                            className={`star ${star <= (hoverRating || selectedBook.rating) ? 'filled' : ''}`}
-                            onClick={() => {
-                              const newRating = star === selectedBook.rating ? 0 : star;
-                              handleUpdateBookDetails(selectedBook.book._id, { rating: newRating });
-                            }}
-                            onMouseEnter={() => setHoverRating(star)}
-                            onMouseLeave={() => setHoverRating(0)}
-                          >
-                            &#9733;
-                          </span>
-                        ))}
+                    {/* Seção para exibir a avaliação e análise salvas */}
+                    {selectedBook.status === 'lido' && (selectedBook.rating > 0 || selectedBook.review) && (
+                      <div className="modal-section user-review-section">
+                        <h4>Sua Avaliação</h4>
+                        <div className="rating-stars-redesigned">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span
+                              key={star}
+                              className={`star ${star <= selectedBook.rating ? 'filled' : ''}`}
+                            >
+                              &#9733;
+                            </span>
+                          ))}
+                        </div>
+                        {selectedBook.review && (
+                          <p className="user-review-text">
+                            "{selectedBook.review}"
+                          </p>
+                        )}
                       </div>
-                    </div>
+                    )}
 
                     <div className="modal-section">
                       <h4>Status da Leitura</h4>
@@ -357,6 +395,14 @@ export function MinhaBibliotecaPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {isReviewModalOpen && bookToReview && (
+            <ReviewModal
+              book={bookToReview.book}
+              onClose={() => setIsReviewModalOpen(false)}
+              onSave={(reviewData) => handleSaveReview(bookToReview.book._id, reviewData)}
+            />
           )}
         </main>
       </div>

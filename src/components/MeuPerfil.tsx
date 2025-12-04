@@ -56,12 +56,15 @@ export function MeuPerfilPage() {
     setUser(updatedUser);
   };
 
+  // Extrai o estilo e a seed do campo avatar, ex: "shapes:owl"
+  const [avatarStyle, avatarSeed] = user?.avatar.split(':') || ['initials', user?.name];
+
   return (
     <main className="main-content">
       <div className="profile-card">
         <div className="profile-header">
           <img 
-            src={`https://api.dicebear.com/8.x/${user?.avatar || 'initials'}/svg?seed=${user?.username}`} 
+            src={`https://api.dicebear.com/8.x/${avatarStyle}/svg?seed=${avatarSeed}`} 
             alt="Avatar" 
             className="profile-avatar"
           />

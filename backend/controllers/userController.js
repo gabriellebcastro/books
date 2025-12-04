@@ -98,7 +98,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
     user.username = req.body.username || user.username;
-    user.avatar = req.body.avatar || user.avatar;
+    user.avatar = req.body.avatar || user.avatar; // Agora salva "estilo:seed"
 
     if (req.body.password) {
       user.password = req.body.password;

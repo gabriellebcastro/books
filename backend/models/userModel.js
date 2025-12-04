@@ -22,6 +22,10 @@ const userBookSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  review: {
+    type: String,
+    default: '',
+  },
 });
 
 const userSchema = mongoose.Schema(
@@ -47,7 +51,7 @@ const userSchema = mongoose.Schema(
     avatar: {
       type: String,
       required: true,
-      default: 'initials',
+      default: 'initials:default', // Salva estilo e seed
     },
     books: [userBookSchema],
     clubes: [

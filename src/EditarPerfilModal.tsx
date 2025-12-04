@@ -16,16 +16,23 @@ interface EditarPerfilModalProps {
   onSave: (updatedUser: Usuario) => void;
 }
 
-const avatarOptions = ['initials', 'bottts', 'adventurer'];
-
 export function EditarPerfilModal({ user, onClose, onSave }: EditarPerfilModalProps) {
   const [formData, setFormData] = useState({
     name: user.name,
     username: user.username,
     email: user.email,
-    avatar: user.avatar,
+    avatar: user.avatar.split(':')[0], // Pega a chave do avatar, ex: "mulher"
   });
   const [error, setError] = useState('');
+
+  const avatarOptions = [
+    { key: 'mulher', style: 'lorelei', seed: 'Casper' },
+    { key: 'coruja', style: 'shapes', seed: 'owl' },
+    { key: 'coelho', style: 'shapes', seed: 'bunny' },
+    { key: 'robo', style: 'bottts', seed: user.username },
+    { key: 'aventura', style: 'adventurer', seed: user.username },
+    { key: 'iniciais', style: 'initials', seed: user.name },
+  ];
 
   useEffect(() => {
     setFormData({
@@ -40,8 +47,8 @@ export function EditarPerfilModal({ user, onClose, onSave }: EditarPerfilModalPr
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAvatarChange = (avatarStyle: string) => {
-    setFormData({ ...formData, avatar: avatarStyle });
+  const handleAvatarChange = (avatarKey: string) => {
+    setFormData({ ...formData, avatar: avatarKey });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,7 +60,16 @@ export function EditarPerfilModal({ user, onClose, onSave }: EditarPerfilModalPr
       const config = {
         headers: { Authorization: `Bearer ${token}` },
       };
-      const { data } = await axios.put('http://localhost:5000/api/users/profile', formData, config);
+
+      // Encontra o objeto do avatar selecionado para enviar o 'style' e a 'seed' corretos
+      const selectedAvatar = avatarOptions.find(opt => opt.key === formData.avatar);
+      const dataToSave = {
+        ...formData,
+        avatar: selectedAvatar ? `${selectedAvatar.style}:${selectedAvatar.seed}` : 'initials:Default',
+      };
+
+      const { data } = await axios.put('http://localhost:5000/api/users/profile', dataToSave, config);
+      
       onSave(data);
       onClose();
     } catch (err) {
@@ -86,15 +102,15 @@ export function EditarPerfilModal({ user, onClose, onSave }: EditarPerfilModalPr
           <div className="form-group">
             <label>Avatar</label>
             <div className="avatar-selection">
-              {avatarOptions.map(style => (
+              {avatarOptions.map(option => (
                 <div 
-                  key={style} 
-                  className={`avatar-option ${formData.avatar === style ? 'selected' : ''}`}
-                  onClick={() => handleAvatarChange(style)}
+                  key={option.key} 
+                  className={`avatar-option ${formData.avatar === option.key ? 'selected' : ''}`}
+                  onClick={() => handleAvatarChange(option.key)}
                 >
                   <img 
-                    src={`https://api.dicebear.com/8.x/${style}/svg?seed=${user.username}`} 
-                    alt={`Avatar estilo ${style}`}
+                    src={`https://api.dicebear.com/8.x/${option.style}/svg?seed=${option.seed}`} 
+                    alt={`Avatar estilo ${option.key}`}
                   />
                 </div>
               ))}

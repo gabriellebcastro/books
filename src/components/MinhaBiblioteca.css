@@ -400,7 +400,7 @@ background: var(--card-bg);
   background: var(--card-bg);
   padding: 24px;
   border-radius: 12px;
-  max-width: 780px;
+  max-width: 900px;
   width: 100%;
   max-height: 90vh;                 /* ← EVITA ESTOURAR TELA */
   overflow-y: auto;                 /* ← SCROLL INTERNO DO MODAL */
@@ -450,6 +450,22 @@ background: var(--card-bg);
   text-align: justify;
   color: var(--primary-text);
   padding-right: 10px;
+}
+.user-review-section {
+  background-color: var(--page-bg);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.user-review-section .rating-stars-redesigned .star {
+  cursor: default; /* Remove o cursor de ponteiro */
+}
+
+.user-review-text {
+  color: var(--secondary-text);
+  font-style: italic;
+  margin-top: 0.75rem;
 }
 
 /* MOBILE – mantém modal usável e sem corte */

@@ -178,7 +178,7 @@ const removeBookFromUserLibrary = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/mybooks/:id
 // @access  Private
 const updateUserBookDetails = asyncHandler(async (req, res) => {
-  const { status, favorite, rating } = req.body;
+  const { status, favorite, rating, review } = req.body;
   const user = await User.findById(req.user._id);
 
   if (user) {
@@ -194,6 +194,7 @@ const updateUserBookDetails = asyncHandler(async (req, res) => {
       if (status) bookToUpdate.status = status;
       if (rating !== undefined) bookToUpdate.rating = rating;
       if (favorite !== undefined) bookToUpdate.favorite = favorite;
+      if (review !== undefined) bookToUpdate.review = review;
 
       await user.save();
 
