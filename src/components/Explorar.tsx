@@ -8,6 +8,9 @@ type Book = {
   author: string;
   cover: string;
   synopsis: string;
+  pages?: number;
+  genre?: string;
+  averageRating?: number;
 };
 
 type UserBook = {
@@ -18,6 +21,7 @@ export function ExplorarPage() {
   const [allBooks, setAllBooks] = useState<Book[]>([]);
   const [myBookIds, setMyBookIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [error, setError] = useState<string | null>(null);
   const token = localStorage.getItem('token');
 
@@ -76,19 +80,24 @@ export function ExplorarPage() {
 
   return (
     <div className="biblioteca-container">
-      <main className="biblioteca-main-content">
-        <div className="biblioteca-hero">
+      <main className="main-content">
+        <header className="clubes-header">
           <h1>Explorar Livros</h1>
-          <p className="subheading">Navegue por todo o nosso catálogo de livros.</p>
-        </div>
+          <p>Navegue por todo o nosso catálogo de livros.</p>
+        </header>
 
         <div className="books-grid">
           {allBooks.map(book => (
             <div key={book._id} className="book-card">
-              <img src={book.cover} alt={book.title} />
+              <img src={book.cover} alt={book.title} onClick={() => setSelectedBook(book)} />
               <div className="book-card-info">
                 <h3>{book.title}</h3>
                 <p>{book.author}</p>
+                {book.averageRating !== undefined && (
+                  <div className="book-average-rating">
+                    ★ {book.averageRating.toFixed(1)}
+                  </div>
+                )}
                 {token && (
                   isBookInLibrary(book._id) ? (
                     <button className="btn-action" disabled>Na sua estante</button>
@@ -100,6 +109,53 @@ export function ExplorarPage() {
             </div>
           ))}
         </div>
+
+        {selectedBook && (
+          <div className="modal-overlay" onClick={() => setSelectedBook(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <button className="modal-close-btn" onClick={() => setSelectedBook(null)}>&times;</button>
+              
+              <div className="modal-body-redesigned">
+                <div className="modal-left-column">
+                  <img src={selectedBook.cover} alt={selectedBook.title} className="modal-book-cover-redesigned" />
+                </div>
+
+                <div className="modal-right-column">
+                  <div className="modal-book-header">
+                    <h2>{selectedBook.title}</h2>
+                    <h3>por {selectedBook.author}</h3>
+                  </div>
+
+                  {selectedBook.averageRating !== undefined && (
+                    <div className="community-rating-section">
+                      <div className="rating-stars-display">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span
+                            key={star}
+                            className={`star ${star <= (selectedBook.averageRating || 0) ? 'filled' : ''}`}
+                          >
+                            &#9733;
+                          </span>
+                        ))}
+                      </div>
+                      <span className="rating-text">{selectedBook.averageRating.toFixed(1)} de 5 (Nota da comunidade)</span>
+                    </div>
+                  )}
+
+                  <div className="modal-book-info">
+                    {selectedBook.genre && <p><strong>Gênero:</strong> {selectedBook.genre}</p>}
+                    {selectedBook.pages && <p><strong>Páginas:</strong> {selectedBook.pages}</p>}
+                  </div>
+
+                  <div className="modal-book-synopsis-redesigned">
+                    <h4>Sinopse</h4>
+                    <p>{selectedBook.synopsis}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

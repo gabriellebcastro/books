@@ -14,6 +14,7 @@ type Book = {
   pages: number;
   cover: string;
   synopsis: string;
+  averageRating?: number;
 };
 
 type UserBook = {
@@ -340,6 +341,12 @@ export function MinhaBibliotecaPage() {
                       <h2>{selectedBook.book.title}</h2>
                       <h3>por {selectedBook.book.author}</h3>
                     </div>
+
+                    {selectedBook.book.averageRating !== undefined && (
+                      <div className="book-average-rating" style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>
+                        ★ {selectedBook.book.averageRating.toFixed(1)} (Nota da comunidade)
+                      </div>
+                    )}
 
                     <div className="modal-book-info">
                       <p><strong>Gênero:</strong> {selectedBook.book.genre}</p>

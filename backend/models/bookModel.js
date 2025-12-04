@@ -31,6 +31,16 @@ const bookSchema = mongoose.Schema(
       type: String,
       required: false,
     },
+    averageRating: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    ratingCount: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
   {
     timestamps: true,

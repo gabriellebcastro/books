@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler';
 import mongoose from 'mongoose';
 import Book from '../models/bookModel.js';
 import User from '../models/userModel.js';
-import { recalculateUserStats } from '../services/statisticsService.js';
+import { recalculateUserStats, recalculateBookAverageRating } from '../services/statisticsService.js';
 
 // Função auxiliar para migrar os dados de livros do usuário para o novo formato
 const ensureNewBookFormat = async (user) => {
@@ -201,6 +201,11 @@ const updateUserBookDetails = asyncHandler(async (req, res) => {
       // Se o status mudou para 'lido' ou deixou de ser 'lido', recalcula as estatísticas
       if (status && status !== oldStatus) {
         await recalculateUserStats(user._id);
+      }
+
+      // Se a nota foi alterada, recalcula a média do livro
+      if (rating !== undefined) {
+        await recalculateBookAverageRating(req.params.id);
       }
       
       // Repopula para retornar o objeto completo
