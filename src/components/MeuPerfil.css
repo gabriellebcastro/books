@@ -1,24 +1,9 @@
-.profile-container {
-  padding: 3rem;
-  background-color: #f9fafb;
-  min-height: 100%;
-}
-
-.profile-card {
-  max-width: 800px;
-  margin: 0 auto;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 2.5rem;
-}
-
 .profile-header {
   display: flex;
   align-items: center;
   gap: 1.5rem;
   padding-bottom: 2rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .profile-avatar {
@@ -26,29 +11,29 @@
   height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 3px solid var(--card-bg);
+  box-shadow: 0 2px 8px var(--shadow-color);
 }
 
 .profile-header-info h1 {
   font-size: 2rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--primary-text);
   margin: 0;
 }
 
 .profile-header-info p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: var(--secondary-text);
   margin-top: 0.25rem;
 }
 
 .btn-edit-profile {
   margin-left: auto;
-  padding: 0.6rem 1.2rem;
-  border: 1px solid #d1d5db;
-  background-color: #fff;
-  color: #374151;
+  padding: 0.6rem 1.2rem;  
+  border: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  color: var(--primary-text);
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
@@ -56,7 +41,7 @@
 }
 
 .btn-edit-profile:hover {
-  background-color: #f9fafb;
+  background-color: var(--hover-bg);
 }
 
 .profile-details {
@@ -66,7 +51,7 @@
 .profile-details h2 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--primary-text);
   margin-bottom: 1.5rem;
 }
 
@@ -74,7 +59,7 @@
   display: flex;
   justify-content: space-between;
   padding: 1rem 0;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color-light);
 }
 
 .info-item:last-child {
@@ -83,16 +68,16 @@
 
 .info-item strong {
   font-weight: 500;
-  color: #4b5563;
+  color: var(--secondary-text);
 }
 
 .info-item span {
-  color: #111827;
+  color: var(--primary-text);
 }
 
 .profile-actions {
   padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: flex-start;
 }

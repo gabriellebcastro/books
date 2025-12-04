@@ -1,12 +1,54 @@
-/* ... existing styles ... */
+/* Definição das variáveis de cor para o tema claro (padrão) */
+:root {
+  --page-bg: #f9fafb;
+  --card-bg: #ffffff;
+  --primary-text: #111827;
+  --secondary-text: #6b7280;
+  --border-color: #e5e7eb;
+  --border-color-light: #f3f4f6;
+  --primary-color: #007bff;
+  --hover-bg: #f4f7f9;
+  --active-bg: #e9ecef;
+  --primary-hover: #0056b3;
+  --accent-color: #6366f1;
+  --accent-hover: #4f46e5;
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --shadow-hover-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Definição das variáveis para o tema escuro */
+body.theme-dark {
+  --page-bg: #111827;
+  --card-bg: #1f2937;
+  --primary-text: #f9fafb;
+  --secondary-text: #9ca3af;
+  --border-color: #374151;
+  --border-color-light: #4b5563;
+  --primary-color: #3b82f6;
+  --hover-bg: #2d3748;
+  --active-bg: #4a5568;
+  --primary-hover: #2563eb;
+  --accent-color: #818cf8;
+  --accent-hover: #6366f1;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+  --shadow-hover-color: rgba(0, 0, 0, 0.3);
+}
 
 .app-layout {
   display: flex;
 }
 
-.main-content {
+.page-wrapper {
   margin-left: 260px; /* Corresponds to --sidebar-width */
-  padding: 0; /* Remove padding to allow pages to control their own spacing */
   width: calc(100% - 260px);
   box-sizing: border-box;
+  background-color: var(--page-bg);
+  min-height: 100vh;
+  padding: 3rem;
+  transition: background-color 0.3s ease;
+}
+
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
 }

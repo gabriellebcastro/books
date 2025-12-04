@@ -1,12 +1,5 @@
 :root {
   --sidebar-width: 260px;
-  --sidebar-bg: #ffffff;
-  --sidebar-text-color: #333;
-  --sidebar-icon-color: #555;
-  --sidebar-hover-bg: #f4f7f9;
-  --sidebar-active-bg: #e9ecef;
-  --primary-color: #007bff;
-  --border-color: #e9ecef;
 }
 
 .sidebar {
@@ -15,12 +8,12 @@
   position: fixed;
   top: 0;
   left: 0;
-  background-color: var(--sidebar-bg);
+  background-color: var(--card-bg);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   padding: 20px 0;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03);
+  box-shadow: 2px 0 10px var(--shadow-color);
   z-index: 1000;
 }
 
@@ -56,7 +49,7 @@
 .sidebar-section-title {
   font-size: 12px;
   font-weight: 600;
-  color: #999;
+  color: var(--secondary-text);
   text-transform: uppercase;
   padding: 25px 10px 10px 10px;
   letter-spacing: 0.5px;
@@ -71,17 +64,17 @@
   text-decoration: none;
   font-size: 15px;
   font-weight: 500;
-  color: var(--sidebar-text-color);
+  color: var(--primary-text);
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .sidebar-nav a:hover, .sidebar-footer a:hover, .sidebar-logout-btn:hover {
-  background-color: var(--sidebar-hover-bg);
-  color: #000;
+  background-color: var(--hover-bg);
+  color: var(--primary-text);
 }
 
 .sidebar-nav a.active, .sidebar-footer a.active {
-  background-color: var(--sidebar-active-bg);
+  background-color: var(--active-bg);
   font-weight: 600;
   color: var(--primary-color);
 }
@@ -89,7 +82,7 @@
 .sidebar-icon {
   margin-right: 15px;
   font-size: 18px;
-  color: var(--sidebar-icon-color);
+  color: var(--secondary-text);
   width: 20px;
   text-align: center;
 }

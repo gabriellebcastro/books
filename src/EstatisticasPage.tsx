@@ -38,13 +38,13 @@ export function EstatisticasPage() {
     fetchStats();
   }, [navigate]);
 
-  if (loading) return <div className="stats-page-container"><p>Carregando estatísticas...</p></div>;
-  if (error) return <div className="stats-page-container"><p className="error-message">{error}</p></div>;
+  if (loading) return <main className="main-content"><p>Carregando estatísticas...</p></main>;
+  if (error) return <main className="main-content"><p className="error-message">{error}</p></main>;
 
   const generosOrdenados = stats ? Object.entries(stats.generosLidos).sort(([, a], [, b]) => b - a) : [];
 
   return (
-    <div className="stats-page-container">
+    <div>
       <main className="stats-main-content">
         <header className="stats-header">
           <h1>Minhas Estatísticas</h1>

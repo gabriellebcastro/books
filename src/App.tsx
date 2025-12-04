@@ -10,7 +10,7 @@ import { Clubes } from "./components/Clubes";
 import { CreateClub } from "./components/CreateClub";
 import { ExplorarPage } from "./components/Explorar";
 import { MeuPerfilPage } from "./components/MeuPerfil";
-import { PlaceholderPage } from "./components/PlaceholderPage";
+import { ConfiguracoesPage } from "./components/ConfiguracoesPage"; // This path is correct, the file needs to be in this location.
 import { MeusClubesPage } from "./components/MeusClubes";
 import { LeiturasDoMesPage } from "./components/LeiturasDoMes";
 import { EventosPage } from "./components/EventosPage"; // Keep this as is
@@ -22,9 +22,9 @@ import "./App.css";
 const AppLayout = () => (
   <div className="app-layout">
     <Sidebar />
-    <main className="main-content">
+    <div className="page-wrapper">
       <Outlet />
-    </main>
+    </div>
   </div>
 );
 
@@ -58,7 +58,7 @@ function App() {
         />
         <Route 
           path="/configuracoes" 
-          element={<PlaceholderPage title="Configurações" description="Em breve, aqui você poderá configurar suas preferências." icon="⚙️" />} 
+          element={<ConfiguracoesPage />} 
         />
       </Route>
     </Routes>

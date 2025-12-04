@@ -1,9 +1,3 @@
-.stats-page-container {
-  padding: 3rem;
-  background-color: #f9fafb;
-  min-height: 100%;
-}
-
 .stats-main-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -16,13 +10,13 @@
 .stats-header h1 {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--primary-text);
   margin-bottom: 0.5rem;
 }
 
 .stats-header p {
   font-size: 1.1rem;
-  color: #6b7280;
+  color: var(--secondary-text);
 }
 
 .stats-grid {
@@ -33,46 +27,46 @@
 }
 
 .stat-card {
-  background-color: #fff;
+  background-color: var(--card-bg);
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px var(--shadow-color);
   text-align: center;
 }
 
 .stat-card .icon {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: #007bff;
+  color: var(--primary-color);
 }
 
 .stat-card .value {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--primary-text);
 }
 
 .stat-card .label {
   font-size: 1rem;
-  color: #6b7280;
+  color: var(--secondary-text);
   font-weight: 500;
 }
 
 .section-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: #111827;
+  color: var(--primary-text);
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .genres-list {
   list-style: none;
   padding: 0;
-  background-color: #fff;
+  background-color: var(--card-bg);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px var(--shadow-color);
   overflow: hidden;
 }
 
@@ -81,7 +75,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color-light);
 }
 
 .genre-item:last-child {
@@ -90,14 +84,14 @@
 
 .genre-name {
   font-weight: 600;
-  color: #374151;
+  color: var(--primary-text);
 }
 
 .genre-count {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #007bff;
-  background-color: #e9f4ff;
+  color: var(--primary-color);
+  background-color: var(--active-bg);
   padding: 0.25rem 0.75rem;
   border-radius: 16px;
 }

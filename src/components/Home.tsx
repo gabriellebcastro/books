@@ -45,7 +45,7 @@ export function Home() {
   }, []);
 
   return (
-    <div className="home-container">
+    <main className="main-content home-container">
       <div className="home-content">
         <div className="text-section">
           <p className="greeting">Oi,</p>
@@ -65,6 +65,6 @@ export function Home() {
           <img src={illustration} alt="Ilustração de leitura" />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

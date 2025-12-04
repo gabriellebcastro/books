@@ -43,7 +43,7 @@ export function Clubes() {
 
 
     return (
-        <div className="page-container">
+        <div>
             <main className="main-content">
 
                 <header className="clubes-header">

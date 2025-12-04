@@ -45,11 +45,11 @@ export function MeuPerfilPage() {
   }, []);
 
   if (loading) {
-    return <div className="profile-container"><p>Carregando perfil...</p></div>;
+    return <main className="main-content"><p>Carregando perfil...</p></main>;
   }
 
   if (error) {
-    return <div className="profile-container"><p className="error-message">{error}</p></div>;
+    return <main className="main-content"><p className="error-message">{error}</p></main>;
   }
 
   const handleSaveProfile = (updatedUser: Usuario) => {
@@ -57,7 +57,7 @@ export function MeuPerfilPage() {
   };
 
   return (
-    <div className="profile-container">
+    <main className="main-content">
       <div className="profile-card">
         <div className="profile-header">
           <img 
@@ -98,6 +98,6 @@ export function MeuPerfilPage() {
           onSave={handleSaveProfile}
         />
       )}
-    </div>
+    </main>
   );
 }
