@@ -59,6 +59,12 @@ const clubSchema = mongoose.Schema(
         data: { type: Date, required: true },
         descricao: { type: String, required: true },
         link: { type: String, required: false },
+        participantes: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+          },
+        ],
       },
     ],
   },

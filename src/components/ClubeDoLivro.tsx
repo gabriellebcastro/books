@@ -25,6 +25,7 @@ interface Encontro {
   data: string;
   descricao: string;
   link?: string;
+  participantes: string[];
 }
 
 interface Club {
@@ -294,6 +295,34 @@ export function ClubeDoLivro() {
     }
   };
 
+  const handleConfirmPresence = async (encontroId: string) => {
+    setActionLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5000/api/clubes/${id}/encontros/${encontroId}/confirmar`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const updatedEncontro = await res.json();
+      if (!res.ok) throw new Error(updatedEncontro.message || "Erro ao confirmar presença.");
+
+      // Atualiza o estado local do encontro específico
+      setClubInfo(prev => {
+        if (!prev) return null;
+        const encontrosAtualizados = prev.encontros?.map(e => 
+          e._id === encontroId ? { ...e, participantes: updatedEncontro.participantes } : e
+        );
+        return { ...prev, encontros: encontrosAtualizados };
+      });
+
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Erro desconhecido.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+
   return (
     <div className="clube-page-container">
       {/* --- CABEÇALHO ESTILO BANNER --- */}
@@ -358,6 +387,14 @@ export function ClubeDoLivro() {
                         <span className="encontro-data">{new Date(encontro.data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
                         <span className="encontro-desc">{encontro.descricao}</span>
                         {encontro.link && <a href={encontro.link} target="_blank" rel="noopener noreferrer" className="encontro-link">Link</a>}
+                        {isMember && (
+                          <button 
+                            className={`btn-confirmar-presenca ${encontro.participantes.includes(currentUserId) ? 'active' : ''}`}
+                            onClick={() => handleConfirmPresence(encontro._id)}
+                            disabled={actionLoading}>
+                            {encontro.participantes.includes(currentUserId) ? '✓ Confirmado' : 'Vou participar'} ({encontro.participantes.length})
+                          </button>
+                        )}
                       </div>
                       {isModerator && (
                         <button className="delete-encontro-btn" onClick={() => handleDeleteEncontro(encontro._id)} disabled={actionLoading}>

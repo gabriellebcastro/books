@@ -11,10 +11,22 @@ interface Clube {
     leituraAtual?: { title: string };
 }
 
+interface EncontroDestaque {
+    _id: string;
+    clube: {
+        _id: string;
+        nome: string;
+    };
+    data: string;
+    descricao: string;
+    participantesCount: number;
+}
+
 export function Clubes() {
     const [clubes, setClubes] = useState<Clube[]>([]);
     const [termoBusca, setTermoBusca] = useState('');
     const [clubeDoMes, setClubeDoMes] = useState<Clube | null>(null);
+    const [encontrosDestaque, setEncontrosDestaque] = useState<EncontroDestaque[]>([]);
 
     useEffect(() => {
         const fetchClubes = async () => {
@@ -43,6 +55,18 @@ export function Clubes() {
             }
         };
         fetchClubeDoMes();
+
+        const fetchEncontrosDestaque = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/clubes/encontros-destaque');
+                if (response.ok) {
+                    setEncontrosDestaque(await response.json());
+                }
+            } catch (error) {
+                console.error('Erro ao buscar encontros em destaque:', error);
+            }
+        };
+        fetchEncontrosDestaque();
     }, []);
 
     const clubesAleatorios = useMemo(() => {
@@ -137,25 +161,27 @@ export function Clubes() {
 
                 {/* ENCONTROS RECOMENDADOS */}
                 <section className="section-container">
-                    <h2 className="section-title">Encontros Recomendados</h2>
-
-                    <div className="events-grid">
-                        <div className="event-card">
-                            <h3 className="event-card-title">Discussão de "Duna"</h3>
-                            <p className="event-card-date">25 de Julho de 2024</p>
-                            <p className="event-card-description">
-                                Prepare-se para uma jornada épica por Arrakis. Traga suas anotações e teorias!
-                            </p>
+                    <h2 className="section-title">Encontros em Destaque</h2>
+                    {encontrosDestaque.length > 0 ? (
+                        <div className="events-grid">
+                            {encontrosDestaque.map(encontro => (
+                                <div key={encontro._id} className="event-card">
+                                    <h3 className="event-card-title">{encontro.descricao}</h3>
+                                    <p className="event-card-date">
+                                        {new Date(encontro.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                    <p className="event-card-description">
+                                        Organizado por <Link to={`/clubes/${encontro.clube._id}`}>{encontro.clube.nome}</Link>
+                                    </p>
+                                    <div className="event-card-footer">
+                                        <span>{encontro.participantesCount} pessoas confirmaram</span>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-
-                        <div className="event-card">
-                            <h3 className="event-card-title">Encontro de Poesia</h3>
-                            <p className="event-card-date">02 de Agosto de 2024</p>
-                            <p className="event-card-description">
-                                Uma noite para compartilhar seus poemas favoritos ou originais.
-                            </p>
-                        </div>
-                    </div>
+                    ) : (
+                        <p>Nenhum encontro em destaque no momento. Seja o primeiro a confirmar presença em um evento!</p>
+                    )}
                 </section>
             </main>
         </div>

@@ -14,8 +14,10 @@ import {
   setLeituraAtual,
   addEncontro,
   sairDoClube,
+  confirmarPresencaEncontro,
   getClubeDoMes,
   deleteEncontro,
+  getEncontrosDestaque,
 } from '../controllers/clubController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import upload from '../middleware/uploadMiddleware.js';
@@ -33,6 +35,9 @@ router.route('/meus-clubes').get(protect, getMeusClubes);
 // Rota para buscar o clube do mês
 router.route('/clube-do-mes').get(getClubeDoMes);
 
+// Rota para buscar os encontros em destaque
+router.route('/encontros-destaque').get(getEncontrosDestaque);
+
 // Rotas específicas por ID
 router.route('/:id')
   .get(getClubeById)
@@ -48,6 +53,7 @@ router.post('/:id/sair', protect, sairDoClube);
 router.put('/:id/leitura', protect, setLeituraAtual);
 router.delete('/:id/membros/:memberId', protect, removeMembro);
 router.post('/:id/encontros', protect, addEncontro);
+router.post('/:id/encontros/:encontroId/confirmar', protect, confirmarPresencaEncontro);
 router.delete('/:id/encontros/:encontroId', protect, deleteEncontro);
 
 export default router;

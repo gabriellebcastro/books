@@ -430,6 +430,78 @@ export const deleteEncontro = asyncHandler(async (req, res) => {
   res.json({ message: 'Encontro removido com sucesso.' });
 });
 
+// @desc    Confirmar presença em um encontro
+// @route   POST /api/clubes/:id/encontros/:encontroId/confirmar
+// @access  Private
+export const confirmarPresencaEncontro = asyncHandler(async (req, res) => {
+  const clube = await Club.findById(req.params.id);
+
+  if (!clube) {
+    res.status(404);
+    throw new Error('Clube não encontrado');
+  }
+
+  const userId = req.user._id.toString();
+  const isMember = clube.membros.some(id => id.toString() === userId) || clube.administradores.some(id => id.toString() === userId);
+
+  if (!isMember) {
+    res.status(403);
+    throw new Error('Apenas membros do clube podem confirmar presença.');
+  }
+
+  const encontro = clube.encontros.id(req.params.encontroId);
+  if (!encontro) {
+    res.status(404);
+    throw new Error('Encontro não encontrado');
+  }
+
+  const jaConfirmado = encontro.participantes.some(id => id.toString() === userId);
+
+  if (jaConfirmado) {
+    // Remove a confirmação
+    encontro.participantes.pull(userId);
+  } else {
+    // Adiciona a confirmação
+    encontro.participantes.push(userId);
+  }
+
+  await clube.save();
+  res.json(encontro);
+});
+
+// @desc    Obter os 3 encontros em destaque (com mais participantes)
+// @route   GET /api/clubes/encontros-destaque
+// @access  Public
+export const getEncontrosDestaque = asyncHandler(async (req, res) => {
+  const encontros = await Club.aggregate([
+    // Desconstrói o array de encontros
+    { $unwind: '$encontros' },
+    // Filtra apenas encontros que ainda não aconteceram
+    { $match: { 'encontros.data': { $gte: new Date() } } },
+    // Adiciona um campo com a contagem de participantes
+    {
+      $addFields: {
+        'encontros.participantesCount': { $size: '$encontros.participantes' }
+      }
+    },
+    // Ordena por contagem de participantes (maior primeiro) e depois por data (mais próximo primeiro)
+    { $sort: { 'encontros.participantesCount': -1, 'encontros.data': 1 } },
+    // Limita aos 3 primeiros
+    { $limit: 3 },
+    // Remodela o documento para um formato mais limpo
+    {
+      $project: {
+        _id: '$encontros._id',
+        clube: { _id: '$_id', nome: '$nome' },
+        data: '$encontros.data',
+        descricao: '$encontros.descricao',
+        participantesCount: '$encontros.participantesCount'
+      }
+    }
+  ]);
+  res.json(encontros);
+});
+
 // @desc    Sair de um clube
 // @route   POST /api/clubes/:id/sair
 // @access  Private
