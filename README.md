@@ -1,6 +1,12 @@
-# Books App - Sua Estante de Livros Digital
+# Books App
 
-O Books App é uma aplicação web completa que permite aos usuários gerenciar uma biblioteca de livros pessoal. Com ele, você pode pesquisar em um catálogo global, adicionar livros à sua estante, visualizar detalhes e organizar sua coleção.
+Uma aplicação web completa que permite aos usuários gerenciar uma biblioteca de livros pessoal. Com ele, você pode pesquisar em um catálogo global, adicionar livros à sua estante, visualizar detalhes e organizar sua coleção.
+
+## Status
+
+🚧 **Funcional** — fluxos principais implementados (autenticação, catálogo global, estante pessoal). Testado manualmente. Testes automatizados e screenshots em progresso.
+
+---
 
 ## Funcionalidades
 
@@ -28,6 +34,31 @@ O Books App é uma aplicação web completa que permite aos usuários gerenciar 
 
 ---
 
+## Estrutura do Projeto
+
+```
+books-app/
+├── backend/
+│   ├── src/
+│   │   ├── models/       # Schemas do MongoDB (Mongoose)
+│   │   ├── routes/       # Rotas da API
+│   │   ├── controllers/  # Lógica de negócio
+│   │   └── middleware/   # Autenticação JWT, validações
+│   ├── .env              # Variáveis de ambiente (não versionado)
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/   # Componentes React
+│   │   ├── pages/        # Páginas/rotas da aplicação
+│   │   └── services/     # Configuração do Axios/API calls
+│   └── package.json
+└── README.md
+```
+
+*Nota: estrutura de pastas exata pode variar — atualize conforme necessário ao revisar o projeto.*
+
+---
+
 ## Configuração e Instalação
 
 Para rodar este projeto localmente, você precisará ter o **Node.js** e o **MongoDB** instalados na sua máquina.
@@ -37,16 +68,19 @@ Para rodar este projeto localmente, você precisará ter o **Node.js** e o **Mon
 Primeiro, vamos configurar o servidor.
 
 a. **Navegue até a pasta do backend:**
+
 ```bash
 cd backend
 ```
 
 b. **Instale as dependências:**
+
 ```bash
 npm install
 ```
 
 c. **Crie o arquivo de ambiente:**
+
 Crie um arquivo chamado `.env` dentro da pasta `backend` e adicione as seguintes variáveis. Você precisará fornecer seus próprios valores para a string de conexão do MongoDB e para o segredo JWT.
 
 ```env
@@ -61,10 +95,13 @@ JWT_SECRET=<seu_segredo_jwt_aqui>
 ```
 
 d. **Inicie o servidor backend:**
+
 Para rodar o servidor em modo de desenvolvimento (com reinicialização automática), use:
+
 ```bash
 npm run dev
 ```
+
 O servidor estará disponível em `http://localhost:5000`.
 
 ### 2. Configuração do Frontend
@@ -74,14 +111,17 @@ Agora, vamos configurar a interface do usuário.
 a. **Abra um novo terminal** e navegue até a pasta raiz do projeto (se você estiver dentro da pasta `backend`, volte um nível com `cd ..`).
 
 b. **Instale as dependências do frontend:**
+
 ```bash
 npm install
 ```
 
 c. **Inicie a aplicação React:**
+
 ```bash
 npm run dev
 ```
+
 A aplicação estará disponível em `http://localhost:5173` (ou outra porta indicada pelo Vite).
 
 ---
